@@ -5,9 +5,11 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from ctxeng.assembly.assembler import ContextAssembler
+from ctxeng.core.context_manager import ContextManager
+from ctxeng.core.profile import ProfileStore
 from ctxeng.llm.base import LLMMessage
 from ctxeng.llm.chat import generate_reply
 from ctxeng.llm.openai import OpenAIProvider
@@ -21,6 +23,8 @@ app = FastAPI(title="CtxEng API", version="0.1.0")
 _store = InMemoryStore()
 _assembler = ContextAssembler(store=_store)
 _tracer = ContextTracer(_assembler)
+_profile_store = ProfileStore()
+_mgr = ContextManager(memory_store=_store, profile_store=_profile_store)
 _llm: Optional[OpenAIProvider] = None
 
 
@@ -81,6 +85,22 @@ class ChatResponse(BaseModel):
     finish_reason: str = "stop"
 
 
+class ToolExecuteRequest(BaseModel):
+    query: str
+
+
+class ToolOutputModel(BaseModel):
+    tool_name: str
+    input: str
+    output: str
+    success: bool
+    duration_ms: float
+
+
+class ToolExecuteResponse(BaseModel):
+    tool_outputs: List[ToolOutputModel]
+
+
 CHAT_HTML = (Path(__file__).resolve().parent / "static" / "chat.html").read_text(encoding="utf-8")
 
 
@@ -122,7 +142,12 @@ def search_memories(user_id: str, query: str = "") -> List[MemoryResponse]:
 @app.post("/prompt", response_model=PromptResponse)
 def build_prompt(body: BuildPromptRequest) -> PromptResponse:
     try:
-        prompt, _ = _tracer.assemble(body.user_id, body.turns, body.current_query)
+        tool_outputs = _mgr.detect_and_run_tools(body.current_query)
+        profile_context = _profile_store.to_context(body.user_id)
+        prompt, _ = _tracer.assemble(
+            body.user_id, body.turns, body.current_query,
+            tool_outputs=tool_outputs, profile_context=profile_context,
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     return PromptResponse(prompt=prompt)
@@ -146,10 +171,77 @@ def chat(body: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+@app.post("/tools/execute", response_model=ToolExecuteResponse)
+def execute_tools(body: ToolExecuteRequest) -> ToolExecuteResponse:
+    outputs = _mgr.detect_and_run_tools(body.query)
+    return ToolExecuteResponse(
+        tool_outputs=[
+            ToolOutputModel(
+                tool_name=t.tool_name,
+                input=t.input,
+                output=t.output,
+                success=t.success,
+                duration_ms=round(t.duration_ms, 2),
+            )
+            for t in outputs
+        ]
+    )
+
+
+@app.get("/tools")
+def list_tools() -> List[str]:
+    return _mgr._tool_registry.list()
+
+
+class ProfilePreferenceRequest(BaseModel):
+    user_id: str
+    key: str
+    value: str
+    category: str = "general"
+
+
+class ProfilePreferenceResponse(BaseModel):
+    key: str
+    value: str
+    category: str
+    updated_at: str
+
+
+class ProfileResponse(BaseModel):
+    user_id: str
+    name: str
+    preferences: dict
+    tags: List[str]
+
+
+@app.get("/profile/{user_id}", response_model=ProfileResponse)
+def get_profile(user_id: str) -> ProfileResponse:
+    profile = _profile_store.get_or_create(user_id)
+    return ProfileResponse(
+        user_id=profile.user_id,
+        name=profile.name,
+        preferences={k: v.value for k, v in profile.preferences.items()},
+        tags=profile.tags,
+    )
+
+
+@app.post("/profile/preference", response_model=ProfilePreferenceResponse)
+def set_preference(body: ProfilePreferenceRequest) -> ProfilePreferenceResponse:
+    pref = _profile_store.set_preference(body.user_id, body.key, body.value, body.category)
+    return ProfilePreferenceResponse(
+        key=pref.key, value=pref.value, category=pref.category, updated_at=pref.updated_at
+    )
+
+
 @app.post("/context/explain", response_model=ExplainResponse)
 def explain_prompt(body: BuildPromptRequest) -> ExplainResponse:
     try:
-        prompt, trace = _tracer.assemble(body.user_id, body.turns, body.current_query)
+        tool_outputs = _mgr.detect_and_run_tools(body.current_query)
+        profile_context = _profile_store.to_context(body.user_id)
+        prompt, trace = _tracer.assemble(
+            body.user_id, body.turns, body.current_query,
+            tool_outputs=tool_outputs, profile_context=profile_context,
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     return ExplainResponse(

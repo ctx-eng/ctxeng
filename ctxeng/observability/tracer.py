@@ -4,9 +4,12 @@ import time
 from typing import Dict, List, Optional, Tuple
 from uuid import uuid4
 
+from typing import List, Optional
+
 from ctxeng.assembly.assembler import ContextAssembler, _estimate_tokens
 from ctxeng.models import ConversationTurn
 from ctxeng.observability.schema import ContextSpan, ContextTrace
+from ctxeng.tools.base import ToolOutput
 
 _trace_store: Dict[str, ContextTrace] = {}
 
@@ -28,7 +31,12 @@ class ContextTracer:
         self.assembler = assembler
 
     def assemble(
-        self, user_id: str, turns: List[ConversationTurn], query: str
+        self,
+        user_id: str,
+        turns: List[ConversationTurn],
+        query: str,
+        tool_outputs: Optional[List[ToolOutput]] = None,
+        profile_context: str = "",
     ) -> Tuple[str, ContextTrace]:
         trace = ContextTrace(
             user_id=user_id,
@@ -73,25 +81,47 @@ class ContextTracer:
             duration_ms=prioritize_ms,
         ))
 
-        # Span 4: Render & check budget
+        # Span 4: Tool execution
+        tool_outputs = tool_outputs or []
+        tool_ms = 0.0
+        if tool_outputs:
+            t0 = time.perf_counter()
+            tool_ms = (time.perf_counter() - t0) * 1000
+            trace.add_span(ContextSpan(
+                stage="tool_execution",
+                input={"tool_count": len(tool_outputs)},
+                output={
+                    "tools": [
+                        {"name": t.tool_name, "success": t.success, "duration_ms": round(t.duration_ms, 1)}
+                        for t in tool_outputs
+                    ]
+                },
+                duration_ms=tool_ms,
+            ))
+
+        # Span 5: Render & check budget
+        profile_block = profile_context or "- no profile"
         memory_block = self.assembler.prioritizer.format_memories(prioritized)
         history_block = self.assembler.prioritizer.format_history(turns)
+        tool_block = self.assembler._format_tool_outputs(tool_outputs)
 
         t0 = time.perf_counter()
         prompt = self.assembler.template.render(
+            profile=profile_block,
             memories=memory_block,
             history=history_block,
+            tool_outputs=tool_block,
             query=query,
         )
         prompt_tokens = _estimate_tokens(prompt)
         over_budget = prompt_tokens > self.assembler.max_tokens
         render_ms = (time.perf_counter() - t0) * 1000
 
-        # Span 5: Trim if over budget
+        # Span 6: Trim if over budget
         trim_ms = 0.0
         if over_budget:
             t0 = time.perf_counter()
-            prompt = self.assembler._trim_to_budget(query, prompt, prioritized, turns)
+            prompt = self.assembler._trim_to_budget(query, prompt, prioritized, turns, tool_outputs, profile_block)
             prompt_tokens = _estimate_tokens(prompt)
             trim_ms = (time.perf_counter() - t0) * 1000
 
@@ -101,6 +131,7 @@ class ContextTracer:
                 "max_tokens": self.assembler.max_tokens,
                 "memory_count": len(prioritized),
                 "history_turns": len(turns),
+                "tool_count": len(tool_outputs),
             },
             output={
                 "prompt_tokens": prompt_tokens,

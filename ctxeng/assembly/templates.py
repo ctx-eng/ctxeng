@@ -4,11 +4,17 @@ import re
 from typing import Dict, List, Optional
 
 DEFAULT_SYSTEM_TEMPLATE = """You are CtxEng.
+User profile:
+{profile}
+
 Relevant memories:
 {memories}
 
 Conversation history:
 {history}
+
+Tool outputs:
+{tool_outputs}
 
 Current request:
 {query}"""
