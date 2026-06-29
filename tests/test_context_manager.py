@@ -1,11 +1,11 @@
 from ctxeng.core.context_manager import ContextManager
-from ctxeng.core.memory_store import MemoryStore
 from ctxeng.models import ConversationTurn
+from ctxeng.stores.memory import InMemoryStore
 
 
 def test_memory_store_persists_and_searches():
-    store = MemoryStore()
-    store.add_memory("user", "I prefer concise answers.")
+    store = InMemoryStore()
+    store.add("user", "I prefer concise answers.")
 
     results = store.search("user", "concise")
 
@@ -14,8 +14,8 @@ def test_memory_store_persists_and_searches():
 
 
 def test_context_manager_builds_prompt_with_memory_and_history():
-    store = MemoryStore()
-    store.add_memory("user", "I prefer concise answers.")
+    store = InMemoryStore()
+    store.add("user", "I prefer concise answers.")
     manager = ContextManager(memory_store=store)
 
     turns = [
