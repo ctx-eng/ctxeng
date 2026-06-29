@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from ctxeng.core.memory_store import MemoryStore
 from ctxeng.models import ConversationTurn
+from ctxeng.stores.base import ContextStore
+from ctxeng.stores.memory import InMemoryStore
 
 
 class ContextManager:
-    def __init__(self, memory_store: Optional[MemoryStore] = None) -> None:
-        self.memory_store = memory_store or MemoryStore()
+    def __init__(self, memory_store: Optional[ContextStore] = None) -> None:
+        self.memory_store = memory_store or InMemoryStore()
 
     def build_prompt(self, user_id: str, turns: List[ConversationTurn], current_query: str) -> str:
         memories = self.memory_store.search(user_id, current_query)

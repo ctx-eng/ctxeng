@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from ctxeng.core.context_manager import ContextManager
-from ctxeng.core.memory_store import MemoryStore
 from ctxeng.models import ConversationTurn
+from ctxeng.stores.memory import InMemoryStore
 
 
 def run_demo() -> str:
-    memory_store = MemoryStore()
-    memory_store.add_memory("demo", "The user likes concise answers.")
+    memory_store = InMemoryStore()
+    memory_store.add("demo", "The user likes concise answers.")
     manager = ContextManager(memory_store=memory_store)
 
     turns = [

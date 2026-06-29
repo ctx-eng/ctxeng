@@ -6,12 +6,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from ctxeng.core.context_manager import ContextManager
-from ctxeng.core.memory_store import MemoryStore
 from ctxeng.models import ConversationTurn, MemoryItem
+from ctxeng.stores.memory import InMemoryStore
 
 app = FastAPI(title="CtxEng API", version="0.1.0")
 
-_store = MemoryStore()
+_store = InMemoryStore()
 _manager = ContextManager(memory_store=_store)
 
 
@@ -31,7 +31,7 @@ class BuildPromptRequest(BaseModel):
 
 
 class MemoryResponse(BaseModel):
-    id: int
+    id: str
     user_id: str
     text: str
     timestamp: Optional[str] = None
@@ -48,9 +48,9 @@ def health():
 
 @app.post("/memories", status_code=201)
 def add_memory(body: AddMemoryRequest) -> MemoryResponse:
-    memory = _store.add_memory(body.user_id, body.text)
+    memory = _store.add(body.user_id, body.text)
     return MemoryResponse(
-        id=id(memory),
+        id=memory.id,
         user_id=memory.user_id,
         text=memory.text,
         timestamp=memory.timestamp,
@@ -59,12 +59,10 @@ def add_memory(body: AddMemoryRequest) -> MemoryResponse:
 
 @app.get("/memories/{user_id}")
 def search_memories(user_id: str, query: str = "") -> List[MemoryResponse]:
-    results = _store.search(user_id, query) if query else [
-        m for m in _store._memories if m.user_id == user_id
-    ]
+    results = _store.search(user_id, query) if query else _store.list(user_id)
     return [
         MemoryResponse(
-            id=id(m),
+            id=m.id,
             user_id=m.user_id,
             text=m.text,
             timestamp=m.timestamp,
