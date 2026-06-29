@@ -15,9 +15,10 @@ class VectorStore(ContextStore):
                 "chromadb is required for VectorStore. "
                 "Install with: pip install 'ctxeng[vector]'"
             )
-        self._client = chromadb.PersistentClient(
-            path=persist_directory or ":memory:"
-        ) if persist_directory else chromadb.EphemeralClient()
+        if persist_directory:
+            self._client = chromadb.PersistentClient(path=persist_directory)
+        else:
+            self._client = chromadb.EphemeralClient()
         self._collection = self._client.get_or_create_collection(collection_name)
 
     def add(self, user_id: str, text: str, metadata: Optional[dict] = None) -> MemoryItem:
