@@ -12,5 +12,8 @@ dependencies = [
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[project.optional-dependencies]
+test = ["httpx>=0.28"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
