@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.core.profile import ProfileStore
+from ctxeng.core.safety import ContextPoisoningFilter, InputValidator, ValidationResult
 from ctxeng.models import ConversationTurn
 from ctxeng.stores.base import ContextStore
 from ctxeng.stores.memory import InMemoryStore
@@ -21,6 +22,8 @@ class ContextManager:
         max_tokens: int = 4096,
         tool_registry: Optional[ToolRegistry] = None,
         profile_store: Optional[ProfileStore] = None,
+        input_validator: Optional[InputValidator] = None,
+        poisoning_filter: Optional[ContextPoisoningFilter] = None,
     ) -> None:
         self.memory_store = memory_store or InMemoryStore()
         self._assembler = assembler or ContextAssembler(
@@ -28,6 +31,8 @@ class ContextManager:
         )
         self._tool_registry = tool_registry or self._default_tools()
         self._profile_store = profile_store or ProfileStore()
+        self._input_validator = input_validator or InputValidator()
+        self._poisoning_filter = poisoning_filter or ContextPoisoningFilter()
 
     @staticmethod
     def _default_tools() -> ToolRegistry:
@@ -35,6 +40,12 @@ class ContextManager:
         reg.register(CalculatorTool())
         reg.register(WebSearchTool())
         return reg
+
+    def validate_input(self, text: str) -> ValidationResult:
+        return self._input_validator.validate(text)
+
+    def filter_memories(self, memories: list) -> list:
+        return self._poisoning_filter.filter_memories(memories)
 
     def build_prompt(
         self,
