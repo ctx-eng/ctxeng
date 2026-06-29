@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 from ctxeng.models import MemoryItem
 
 
 @dataclass
 class ContextDiff:
-    added: List[MemoryItem] = field(default_factory=list)
-    removed: List[MemoryItem] = field(default_factory=list)
-    score_changes: Dict[str, float] = field(default_factory=dict)
+    added: list[MemoryItem] = field(default_factory=list)
+    removed: list[MemoryItem] = field(default_factory=list)
+    score_changes: dict[str, float] = field(default_factory=dict)
 
     @property
     def has_changes(self) -> bool:
@@ -18,11 +17,11 @@ class ContextDiff:
 
     @staticmethod
     def compute(
-        previous: List[MemoryItem],
-        current: List[MemoryItem],
+        previous: list[MemoryItem],
+        current: list[MemoryItem],
     ) -> ContextDiff:
-        prev_map: Dict[str, MemoryItem] = {m.id: m for m in previous}
-        curr_map: Dict[str, MemoryItem] = {m.id: m for m in current}
+        prev_map: dict[str, MemoryItem] = {m.id: m for m in previous}
+        curr_map: dict[str, MemoryItem] = {m.id: m for m in current}
 
         prev_ids = set(prev_map.keys())
         curr_ids = set(curr_map.keys())
@@ -34,7 +33,7 @@ class ContextDiff:
         added = [curr_map[i] for i in added_ids]
         removed = [prev_map[i] for i in removed_ids]
 
-        score_changes: Dict[str, float] = {}
+        score_changes: dict[str, float] = {}
         for mid in common_ids:
             old_score = prev_map[mid].score
             new_score = curr_map[mid].score
@@ -48,7 +47,7 @@ class ContextDiff:
         )
 
     def summary(self, max_items: int = 3) -> str:
-        parts: List[str] = []
+        parts: list[str] = []
         if self.added:
             added_texts = [f"+ {m.text[:50]}" for m in self.added[:max_items]]
             parts.append(f"Added ({len(self.added)}): " + "; ".join(added_texts))

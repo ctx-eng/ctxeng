@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ctxeng.core.context_manager import ContextManager
-from ctxeng.core.profile import ProfileStore, UserProfile
+from ctxeng.core.profile import ProfileStore
 
 
 def test_profile_store_get_or_create() -> None:

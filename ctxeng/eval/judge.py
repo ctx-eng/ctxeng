@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from ctxeng.llm.base import LLMProvider
 
@@ -10,11 +10,11 @@ from ctxeng.llm.base import LLMProvider
 class CorrectnessScore:
     score: float
     explanation: str = ""
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 class CorrectnessEvaluator:
-    def __init__(self, provider: Optional[LLMProvider] = None) -> None:
+    def __init__(self, provider: LLMProvider | None = None) -> None:
         self._provider = provider
 
     def evaluate(

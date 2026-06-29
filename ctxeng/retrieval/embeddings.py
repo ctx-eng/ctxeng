@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 
 class EmbeddingModel:
@@ -22,12 +22,12 @@ class EmbeddingModel:
         from sentence_transformers import SentenceTransformer
         self._model = SentenceTransformer(self.model_name)
 
-    def encode(self, texts: List[str]) -> List[List[float]]:
+    def encode(self, texts: list[str]) -> list[list[float]]:
         self._lazy_load()
         embeddings = self._model.encode(texts)
         return embeddings.tolist()
 
-    def encode_query(self, query: str) -> List[float]:
+    def encode_query(self, query: str) -> list[float]:
         return self.encode([query])[0]
 
     @property

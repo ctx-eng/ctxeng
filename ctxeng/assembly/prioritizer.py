@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.models import MemoryItem
 
@@ -20,11 +20,11 @@ class Prioritizer:
         self.diversity_weight = diversity_weight
         self.dedup_threshold = dedup_threshold
 
-    def deduplicate(self, items: List[MemoryItem]) -> List[MemoryItem]:
+    def deduplicate(self, items: list[MemoryItem]) -> list[MemoryItem]:
         if len(items) < 2:
             return items
 
-        kept: List[MemoryItem] = []
+        kept: list[MemoryItem] = []
         for item in items:
             is_dup = False
             for existing in kept:
@@ -38,7 +38,7 @@ class Prioritizer:
                 kept.append(item)
         return kept
 
-    def prioritize(self, items: List[MemoryItem], top_k: Optional[int] = None) -> List[MemoryItem]:
+    def prioritize(self, items: list[MemoryItem], top_k: Optional[int] = None) -> list[MemoryItem]:
         if not items:
             return []
 
@@ -47,7 +47,7 @@ class Prioritizer:
         if self.diversity_weight <= 0 or len(sorted_items) <= 1:
             return sorted_items[:top_k]
 
-        selected: List[MemoryItem] = [sorted_items[0]]
+        selected: list[MemoryItem] = [sorted_items[0]]
         candidates = sorted_items[1:]
 
         while candidates and (top_k is None or len(selected) < top_k):
@@ -65,12 +65,12 @@ class Prioritizer:
 
         return selected
 
-    def format_memories(self, items: List[MemoryItem]) -> str:
+    def format_memories(self, items: list[MemoryItem]) -> str:
         if not items:
             return "- none"
         return "\n".join(f"- {m.text}" for m in items)
 
-    def format_history(self, turns: List, roles: Optional[List[str]] = None) -> str:
+    def format_history(self, turns: list, roles: list[str] | None = None) -> str:
         if not turns:
             return "- no prior conversation"
         return "\n".join(f"{t.role}: {t.content}" for t in turns)

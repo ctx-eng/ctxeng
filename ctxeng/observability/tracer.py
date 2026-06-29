@@ -1,24 +1,21 @@
 from __future__ import annotations
 
 import time
-from typing import Dict, List, Optional, Tuple
-from uuid import uuid4
-
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.assembly.assembler import ContextAssembler, _estimate_tokens
 from ctxeng.models import ConversationTurn
 from ctxeng.observability.schema import ContextSpan, ContextTrace
 from ctxeng.tools.base import ToolOutput
 
-_trace_store: Dict[str, ContextTrace] = {}
+_trace_store: dict[str, ContextTrace] = {}
 
 
-def get_trace(trace_id: str) -> Optional[ContextTrace]:
+def get_trace(trace_id: str) -> ContextTrace | None:
     return _trace_store.get(trace_id)
 
 
-def list_traces(user_id: Optional[str] = None, limit: int = 10) -> List[ContextTrace]:
+def list_traces(user_id: Optional[str] = None, limit: int = 10) -> list[ContextTrace]:
     traces = list(_trace_store.values())
     if user_id:
         traces = [t for t in traces if t.user_id == user_id]
@@ -33,11 +30,11 @@ class ContextTracer:
     def assemble(
         self,
         user_id: str,
-        turns: List[ConversationTurn],
+        turns: list[ConversationTurn],
         query: str,
-        tool_outputs: Optional[List[ToolOutput]] = None,
+        tool_outputs: list[ToolOutput] | None = None,
         profile_context: str = "",
-    ) -> Tuple[str, ContextTrace]:
+    ) -> tuple[str, ContextTrace]:
         trace = ContextTrace(
             user_id=user_id,
             query=query,

@@ -1,0 +1,10 @@
+# Core dependencies (pinned 2026-06-30)
+fastapi>=0.115
+uvicorn[standard]>=0.34
+
+# Optional extras (install via `ctxeng[all]` or specific extras)
+# ctxeng[templates]:  jinja2>=3.1
+# ctxeng[retrieval]:  rank-bm25>=0.2
+# ctxeng[vector]:     sentence-transformers>=3.0, numpy>=1.24
+# ctxeng[llm]:        openai>=1.0
+# ctxeng[test]:       httpx>=0.28

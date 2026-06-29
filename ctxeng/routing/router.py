@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 from ctxeng.models import ConversationTurn, MemoryItem
 from ctxeng.retrieval.hybrid import HybridRetriever
@@ -12,32 +11,32 @@ from ctxeng.stores.base import ContextStore
 
 @dataclass
 class RouterResult:
-    memories: List[MemoryItem]
+    memories: list[MemoryItem]
     diff: ContextDiff
     step: int = 0
-    trace: Dict = field(default_factory=dict)
+    trace: dict = field(default_factory=dict)
 
 
 class ContextRouter:
     def __init__(
         self,
         store: ContextStore,
-        retriever: Optional[HybridRetriever] = None,
-        lifecycle: Optional[LifecycleManager] = None,
+        retriever: HybridRetriever | None = None,
+        lifecycle: LifecycleManager | None = None,
         max_history: int = 20,
     ) -> None:
         self.store = store
         self.retriever = retriever or HybridRetriever(store)
         self.lifecycle = lifecycle or LifecycleManager(store)
         self.max_history = max_history
-        self._session_steps: Dict[str, int] = {}
-        self._previous_context: Dict[str, List[MemoryItem]] = {}
+        self._session_steps: dict[str, int] = {}
+        self._previous_context: dict[str, list[MemoryItem]] = {}
 
     def step(
         self,
         user_id: str,
         query: str,
-        turns: Optional[List[ConversationTurn]] = None,
+        turns: list[ConversationTurn] | None = None,
     ) -> RouterResult:
         if user_id not in self._session_steps:
             self._session_steps[user_id] = 0
@@ -85,7 +84,7 @@ class ContextRouter:
         self,
         user_id: str,
         query: str,
-        base_memories: List[MemoryItem],
+        base_memories: list[MemoryItem],
     ) -> RouterResult:
         memories = self.retriever.search(user_id, query)
         all_memories = list({m.id: m for m in base_memories + memories}.values())

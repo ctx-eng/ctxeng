@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Optional
 
-from ctxeng.models import MemoryItem
 from ctxeng.stores.base import ContextStore
 
 
@@ -25,8 +24,8 @@ class LifecycleManager:
     ) -> None:
         self.store = store
         self.stale_after_turns = stale_after_turns
-        self._records: Dict[str, LifecycleRecord] = {}
-        self._turn_counter: Dict[str, int] = {}
+        self._records: dict[str, LifecycleRecord] = {}
+        self._turn_counter: dict[str, int] = {}
 
     def record_access(self, memory_id: str) -> LifecycleRecord:
         if memory_id in self._records:
@@ -44,10 +43,10 @@ class LifecycleManager:
         rec = self._records.get(memory_id)
         return rec.state if rec else None
 
-    def get_record(self, memory_id: str) -> Optional[LifecycleRecord]:
+    def get_record(self, memory_id: str) -> LifecycleRecord | None:
         return self._records.get(memory_id)
 
-    def list_by_state(self, state: str) -> List[LifecycleRecord]:
+    def list_by_state(self, state: str) -> list[LifecycleRecord]:
         return [r for r in self._records.values() if r.state == state]
 
     def mark_stale(self, memory_id: str) -> None:

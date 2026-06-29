@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, List, Optional
 
 from ctxeng.compression.summarizer import ContextSummarizer
 from ctxeng.models import MemoryItem
@@ -14,13 +13,13 @@ class MemoryConsolidator:
         store: ContextStore,
         turn_threshold: int = 10,
         batch_size: int = 5,
-        summarizer: Optional[ContextSummarizer] = None,
+        summarizer: ContextSummarizer | None = None,
     ) -> None:
         self.store = store
         self.turn_threshold = turn_threshold
         self.batch_size = batch_size
         self.summarizer = summarizer or ContextSummarizer()
-        self._turn_count: Dict[str, int] = defaultdict(int)
+        self._turn_count: dict[str, int] = defaultdict(int)
 
     def record_turn(self, user_id: str, text: str) -> MemoryItem:
         memory = self.store.add(user_id, text, metadata={"type": "working"})
@@ -69,7 +68,7 @@ class MemoryConsolidator:
         episodic = [m for m in memories if m.metadata.get("type") == "episodic"]
         working = [m for m in memories if m.metadata.get("type") != "episodic"]
 
-        parts: List[str] = []
+        parts: list[str] = []
         if episodic:
             parts.append("Summary of past conversations:")
             for m in episodic:

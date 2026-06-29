@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import time
-from typing import Optional
 
 from ctxeng.stores.base import ContextStore
 from ctxeng.tools.base import BaseTool, ToolOutput
@@ -11,7 +10,7 @@ class FileLookupTool(BaseTool):
     name = "file_lookup"
     description = "Search stored memories by keyword. Input: a search term to find matching memories."
 
-    def __init__(self, store: Optional[ContextStore] = None, user_id: str = "") -> None:
+    def __init__(self, store: ContextStore | None = None, user_id: str = "") -> None:
         super().__init__()
         self._store = store
         self._user_id = user_id

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Optional
 
 DEFAULT_SYSTEM_TEMPLATE = """You are CtxEng.
 User profile:
@@ -26,7 +25,7 @@ class PromptTemplate:
         self._template = template
 
     @property
-    def slots(self) -> List[str]:
+    def slots(self) -> list[str]:
         return re.findall(r"\{(\w+)\}", self._template)
 
     def render(self, **kwargs: str) -> str:
@@ -47,7 +46,7 @@ class PromptTemplate:
         return self._template.format(**kwargs)
 
 
-TEMPLATE_REGISTRY: Dict[str, PromptTemplate] = {
+TEMPLATE_REGISTRY: dict[str, PromptTemplate] = {
     "default": PromptTemplate(DEFAULT_SYSTEM_TEMPLATE, name="default"),
 }
 
@@ -58,5 +57,5 @@ def register_template(name: str, template: str) -> PromptTemplate:
     return pt
 
 
-def get_template(name: str = "default") -> Optional[PromptTemplate]:
+def get_template(name: str = "default") -> PromptTemplate | None:
     return TEMPLATE_REGISTRY.get(name)

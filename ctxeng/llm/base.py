@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 
 @dataclass
@@ -20,11 +19,11 @@ class LLMResponse:
 
 class LLMProvider(ABC):
     @abstractmethod
-    def generate(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+    def generate(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         ...
 
     @abstractmethod
-    def stream(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+    def stream(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         ...
 
     @property

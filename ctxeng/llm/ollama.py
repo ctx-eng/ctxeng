@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import urllib.request
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ctxeng.llm.base import LLMMessage, LLMProvider, LLMResponse
 
@@ -16,7 +16,7 @@ class OllamaProvider(LLMProvider):
     def model_name(self) -> str:
         return self._model
 
-    def _post(self, payload: Dict[str, Any]) -> Any:
+    def _post(self, payload: dict[str, Any]) -> Any:
         data = json.dumps(payload).encode()
         req = urllib.request.Request(
             f"{self._base_url}/api/chat",
@@ -26,7 +26,7 @@ class OllamaProvider(LLMProvider):
         with urllib.request.urlopen(req) as resp:
             return json.loads(resp.read())
 
-    def generate(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+    def generate(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         raw = [{"role": m.role, "content": m.content} for m in messages]
         result = self._post({
             "model": self._model,
@@ -39,7 +39,7 @@ class OllamaProvider(LLMProvider):
             finish_reason=result.get("done_reason", "stop"),
         )
 
-    def stream(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+    def stream(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         raw = [{"role": m.role, "content": m.content} for m in messages]
         data = json.dumps({"model": self._model, "messages": raw, "stream": True, **kwargs}).encode()
         req = urllib.request.Request(
@@ -47,7 +47,7 @@ class OllamaProvider(LLMProvider):
             data=data,
             headers={"Content-Type": "application/json"},
         )
-        collected: List[str] = []
+        collected: list[str] = []
         with urllib.request.urlopen(req) as resp:
             for line in resp:
                 chunk = json.loads(line)

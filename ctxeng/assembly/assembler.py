@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 from ctxeng.assembly.prioritizer import Prioritizer
 from ctxeng.assembly.templates import PromptTemplate, get_template
 from ctxeng.models import ConversationTurn, MemoryItem
@@ -46,11 +44,11 @@ def _truncate_text(text: str, max_tokens: int) -> str:
 class ContextAssembler:
     def __init__(
         self,
-        store: Optional[ContextStore] = None,
-        retriever: Optional[HybridRetriever] = None,
-        template: Optional[PromptTemplate] = None,
+        store: ContextStore | None = None,
+        retriever: HybridRetriever | None = None,
+        template: PromptTemplate | None = None,
         max_tokens: int = 4096,
-        prioritizer: Optional[Prioritizer] = None,
+        prioritizer: Prioritizer | None = None,
     ) -> None:
         self.store = store or InMemoryStore()
         self.retriever = retriever or HybridRetriever(self.store)
@@ -61,9 +59,9 @@ class ContextAssembler:
     def assemble(
         self,
         user_id: str,
-        turns: List[ConversationTurn],
+        turns: list[ConversationTurn],
         query: str,
-        tool_outputs: Optional[List[ToolOutput]] = None,
+        tool_outputs: list[ToolOutput] | None = None,
         profile_context: str = "",
     ) -> str:
         memories = self.retriever.search(user_id, query)
@@ -89,7 +87,7 @@ class ContextAssembler:
         return prompt
 
     @staticmethod
-    def _format_tool_outputs(outputs: List[ToolOutput]) -> str:
+    def _format_tool_outputs(outputs: list[ToolOutput]) -> str:
         if not outputs:
             return "- none"
         lines = []
@@ -102,9 +100,9 @@ class ContextAssembler:
         self,
         query: str,
         prompt: str,
-        memories: List[MemoryItem],
-        turns: List[ConversationTurn],
-        tool_outputs: List[ToolOutput],
+        memories: list[MemoryItem],
+        turns: list[ConversationTurn],
+        tool_outputs: list[ToolOutput],
         profile_context: str = "",
     ) -> str:
         headroom = self.max_tokens - _estimate_tokens(query)
@@ -174,7 +172,7 @@ class ContextAssembler:
         return "\n".join(kept) if kept else "- no profile"
 
     @staticmethod
-    def _trim_tool_outputs(outputs: List[ToolOutput], budget: int) -> str:
+    def _trim_tool_outputs(outputs: list[ToolOutput], budget: int) -> str:
         if budget <= 0 or not outputs:
             return "- none"
         lines = []
@@ -189,7 +187,7 @@ class ContextAssembler:
             return "- none"
         return "\n".join(lines)
 
-    def _trim_memories(self, memories: List[MemoryItem], budget: int) -> str:
+    def _trim_memories(self, memories: list[MemoryItem], budget: int) -> str:
         if budget <= 0:
             return "- none"
 
@@ -205,7 +203,7 @@ class ContextAssembler:
             return "- none"
         return "\n".join(lines)
 
-    def _trim_history(self, turns: List[ConversationTurn], budget: int) -> str:
+    def _trim_history(self, turns: list[ConversationTurn], budget: int) -> str:
         if budget <= 0:
             return "- no prior conversation"
 

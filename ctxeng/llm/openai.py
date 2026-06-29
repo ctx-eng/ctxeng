@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.llm.base import LLMMessage, LLMProvider, LLMResponse
 
@@ -14,10 +14,10 @@ class OpenAIProvider(LLMProvider):
     ) -> None:
         try:
             from openai import OpenAI
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
                 "openai SDK is required. Install with: pip install openai"
-            )
+            ) from exc
         self._model = model
         self._client = OpenAI(api_key=api_key, base_url=base_url)
 
@@ -25,7 +25,7 @@ class OpenAIProvider(LLMProvider):
     def model_name(self) -> str:
         return self._model
 
-    def generate(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+    def generate(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         raw = [{"role": m.role, "content": m.content} for m in messages]
         resp = self._client.chat.completions.create(
             model=self._model,
@@ -42,9 +42,9 @@ class OpenAIProvider(LLMProvider):
             },
         )
 
-    def stream(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+    def stream(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         raw = [{"role": m.role, "content": m.content} for m in messages]
-        collected: List[str] = []
+        collected: list[str] = []
         stream = self._client.chat.completions.create(
             model=self._model,
             messages=raw,

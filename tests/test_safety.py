@@ -4,8 +4,6 @@ from ctxeng.core.context_manager import ContextManager
 from ctxeng.core.safety import (
     ContextPoisoningFilter,
     InputValidator,
-    POISONING_PATTERNS,
-    SUSPICIOUS_PATTERNS,
 )
 
 

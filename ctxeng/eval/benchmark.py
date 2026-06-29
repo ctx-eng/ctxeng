@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Set
 
 from ctxeng.assembly.assembler import ContextAssembler, _estimate_tokens
-from ctxeng.eval.datasets import EvalDataset, EvalQuery, BUILT_IN_DATASETS
+from ctxeng.eval.datasets import BUILT_IN_DATASETS, EvalDataset
 from ctxeng.eval.metrics import ContextMetrics
 from ctxeng.retrieval.hybrid import HybridRetriever
 from ctxeng.stores.base import ContextStore
@@ -14,8 +13,8 @@ from ctxeng.stores.base import ContextStore
 @dataclass
 class QueryResult:
     query: str
-    retrieved_ids: List[str]
-    relevant_ids: Set[str]
+    retrieved_ids: list[str]
+    relevant_ids: set[str]
     latency_ms: float
     precision_at_1: float
     precision_at_3: float
@@ -42,7 +41,7 @@ class BenchmarkResult:
     avg_token_efficiency: float
     avg_latency_ms: float
     total_duration_ms: float
-    queries: List[QueryResult] = field(default_factory=list)
+    queries: list[QueryResult] = field(default_factory=list)
 
 
 class BenchmarkRunner:
@@ -61,7 +60,7 @@ class BenchmarkRunner:
         for m in dataset.memories:
             self.store.add(m.user_id, m.text)
 
-        query_results: List[QueryResult] = []
+        query_results: list[QueryResult] = []
         for eq in dataset.queries:
             t0 = time.perf_counter()
             retrieved = self.retriever.search(eq.user_id, eq.query, top_k=10)
@@ -123,8 +122,8 @@ class BenchmarkRunner:
             queries=query_results,
         )
 
-    def run_all(self) -> Dict[str, BenchmarkResult]:
-        results: Dict[str, BenchmarkResult] = {}
+    def run_all(self) -> dict[str, BenchmarkResult]:
+        results: dict[str, BenchmarkResult] = {}
         for name, dataset in BUILT_IN_DATASETS.items():
             results[name] = self.run_dataset(dataset)
         return results

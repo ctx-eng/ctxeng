@@ -5,7 +5,6 @@ import pytest
 from ctxeng.assembly.assembler import ContextAssembler, _estimate_tokens, _truncate_text
 from ctxeng.assembly.prioritizer import Prioritizer, _trigram_similarity
 from ctxeng.assembly.templates import (
-    DEFAULT_SYSTEM_TEMPLATE,
     TEMPLATE_REGISTRY,
     PromptTemplate,
     get_template,
@@ -53,7 +52,10 @@ class TestPromptTemplate:
     def test_default_template_format(self) -> None:
         t = get_template("default")
         assert t is not None
-        result = t.render(memories="- foo", history="- bar", query="test")
+        result = t.render(
+            profile="- no profile", memories="- foo", history="- bar",
+            tool_outputs="- none", query="test",
+        )
         assert "Relevant memories:" in result
         assert "- foo" in result
         assert "Conversation history:" in result
@@ -265,5 +267,5 @@ class TestContextAssembler:
         store.add("alice", "highly relevant content about the query subject")
         assembler = ContextAssembler(store=store)
         result = assembler.assemble("alice", [], "query subject")
-        lines = [l for l in result.split("\n") if l.startswith("- ")]
+        lines = [line for line in result.split("\n") if line.startswith("- ")]
         assert len(lines) >= 1

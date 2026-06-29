@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.llm.base import LLMMessage, LLMProvider, LLMResponse
@@ -16,7 +16,7 @@ def run_chat(
 
     store = InMemoryStore()
     assembler = ContextAssembler(store=store)
-    turns: List[ConversationTurn] = []
+    turns: list[ConversationTurn] = []
 
     print(f"CtxEng Chat ({provider.model_name}) — /exit to quit\n")
 

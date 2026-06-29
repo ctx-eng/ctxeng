@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
 
 from ctxeng.models import MemoryItem
 
@@ -11,7 +10,7 @@ class TextIngestor:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
-    def ingest(self, filepath: str, user_id: str) -> List[MemoryItem]:
+    def ingest(self, filepath: str, user_id: str) -> list[MemoryItem]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -29,12 +28,12 @@ class TextIngestor:
             for i, chunk in enumerate(chunks)
         ]
 
-    def _chunk_text(self, text: str) -> List[str]:
+    def _chunk_text(self, text: str) -> list[str]:
         if len(text) <= self.chunk_size:
             return [text]
 
         overlap = min(self.chunk_overlap, self.chunk_size // 2)
-        chunks: List[str] = []
+        chunks: list[str] = []
         start = 0
         while start < len(text):
             end = start + self.chunk_size
@@ -58,7 +57,7 @@ class TextIngestor:
 
 
 class MarkdownIngestor(TextIngestor):
-    def ingest(self, filepath: str, user_id: str) -> List[MemoryItem]:
+    def ingest(self, filepath: str, user_id: str) -> list[MemoryItem]:
         items = super().ingest(filepath, user_id)
         for item in items:
             item.metadata["type"] = "markdown"

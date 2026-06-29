@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.models import MemoryItem
 
@@ -25,8 +25,8 @@ class CrossEncoderReranker:
         self._model = CrossEncoder(self.model_name)
 
     def rerank(
-        self, query: str, candidates: List[MemoryItem], top_k: Optional[int] = None
-    ) -> List[MemoryItem]:
+        self, query: str, candidates: list[MemoryItem], top_k: Optional[int] = None
+    ) -> list[MemoryItem]:
         self._lazy_load()
         if not candidates:
             return []

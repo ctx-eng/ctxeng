@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import List
 
-SUSPICIOUS_PATTERNS: List[re.Pattern] = [
+SUSPICIOUS_PATTERNS: list[re.Pattern] = [
     re.compile(r"ignore\s+(all\s+)?(previous|above|prior\s+)?\s*instructions?", re.IGNORECASE),
     re.compile(r"system\s*(prompt|instruction|message)", re.IGNORECASE),
     re.compile(r"you\s+are\s+(now|not\s+)?\s*(an?\s+)?(free|unbounded|ungoverned)", re.IGNORECASE),
@@ -17,7 +16,7 @@ SUSPICIOUS_PATTERNS: List[re.Pattern] = [
     re.compile(r"\[\/?SYSTEM\]", re.IGNORECASE),
 ]
 
-POISONING_PATTERNS: List[re.Pattern] = [
+POISONING_PATTERNS: list[re.Pattern] = [
     re.compile(r"this\s+is\s+(an?\s+)?(important\s+)?instruction", re.IGNORECASE),
     re.compile(r"when\s+asked\s+about\s+\w+\s+(always|never)\s+(say|respond|answer)", re.IGNORECASE),
     re.compile(r"remember.*new\s+rules?", re.IGNORECASE),
@@ -29,7 +28,7 @@ POISONING_PATTERNS: List[re.Pattern] = [
 @dataclass
 class ValidationResult:
     passed: bool
-    matched_patterns: List[str] = field(default_factory=list)
+    matched_patterns: list[str] = field(default_factory=list)
     reason: str = ""
 
 
@@ -46,7 +45,7 @@ class InputValidator:
                 reason=f"input exceeds max length ({len(text)} > {self.max_length})",
             )
 
-        matched: List[str] = []
+        matched: list[str] = []
         for pat in SUSPICIOUS_PATTERNS:
             if pat.search(text):
                 matched.append(pat.pattern)
@@ -63,7 +62,7 @@ class InputValidator:
 
 class ContextPoisoningFilter:
     def check(self, text: str) -> ValidationResult:
-        matched: List[str] = []
+        matched: list[str] = []
         for pat in POISONING_PATTERNS:
             if pat.search(text):
                 matched.append(pat.pattern)

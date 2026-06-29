@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 from ctxeng.models import MemoryItem
 from ctxeng.retrieval.embeddings import EmbeddingModel
 from ctxeng.stores.base import ContextStore
@@ -14,7 +12,7 @@ except ImportError:
     HAS_NUMPY = False
 
 
-def _cosine_similarity(a: List[float], b: List[float]) -> float:
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
     if not a or not b:
         return 0.0
     if HAS_NUMPY:
@@ -32,16 +30,16 @@ def _cosine_similarity(a: List[float], b: List[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
-def _tokenize(text: str) -> List[str]:
+def _tokenize(text: str) -> list[str]:
     return text.lower().split()
 
 
 class BM25Retriever:
     def __init__(self) -> None:
-        self._corpus: List[str] = []
+        self._corpus: list[str] = []
         self._bm25 = None
 
-    def index(self, texts: List[str]) -> None:
+    def index(self, texts: list[str]) -> None:
         self._corpus = texts
         if not texts:
             self._bm25 = None
@@ -53,7 +51,7 @@ class BM25Retriever:
         except ImportError:
             self._bm25 = None
 
-    def search(self, query: str) -> List[float]:
+    def search(self, query: str) -> list[float]:
         if self._bm25 is None:
             return [0.0] * len(self._corpus)
         tokenized_query = _tokenize(query)
@@ -65,14 +63,14 @@ class HybridRetriever:
         self,
         store: ContextStore,
         alpha: float = 0.5,
-        embedder: Optional[EmbeddingModel] = None,
+        embedder: EmbeddingModel | None = None,
     ) -> None:
         self.store = store
         self.alpha = alpha
         self.embedder = embedder or EmbeddingModel()
         self._bm25 = BM25Retriever()
 
-    def search(self, user_id: str, query: str, top_k: int = 10) -> List[MemoryItem]:
+    def search(self, user_id: str, query: str, top_k: int = 10) -> list[MemoryItem]:
         candidates = self.store.list(user_id)
 
         if not query:
@@ -83,7 +81,7 @@ class HybridRetriever:
         texts = [c.text for c in candidates]
         n = len(candidates)
 
-        dense_scores: List[float]
+        dense_scores: list[float]
         if self.embedder.available and n > 0:
             query_emb = self.embedder.encode_query(query)
             candidate_embs = self.embedder.encode(texts)

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.core.profile import ProfileStore
 from ctxeng.core.safety import ContextPoisoningFilter, InputValidator, ValidationResult
@@ -17,13 +15,13 @@ from ctxeng.tools.web_search import WebSearchTool
 class ContextManager:
     def __init__(
         self,
-        memory_store: Optional[ContextStore] = None,
-        assembler: Optional[ContextAssembler] = None,
+        memory_store: ContextStore | None = None,
+        assembler: ContextAssembler | None = None,
         max_tokens: int = 4096,
-        tool_registry: Optional[ToolRegistry] = None,
-        profile_store: Optional[ProfileStore] = None,
-        input_validator: Optional[InputValidator] = None,
-        poisoning_filter: Optional[ContextPoisoningFilter] = None,
+        tool_registry: ToolRegistry | None = None,
+        profile_store: ProfileStore | None = None,
+        input_validator: InputValidator | None = None,
+        poisoning_filter: ContextPoisoningFilter | None = None,
     ) -> None:
         self.memory_store = memory_store or InMemoryStore()
         self._assembler = assembler or ContextAssembler(
@@ -50,9 +48,9 @@ class ContextManager:
     def build_prompt(
         self,
         user_id: str,
-        turns: List[ConversationTurn],
+        turns: list[ConversationTurn],
         current_query: str,
-        tool_outputs: Optional[List[ToolOutput]] = None,
+        tool_outputs: list[ToolOutput] | None = None,
     ) -> str:
         profile_context = self._profile_store.to_context(user_id)
         return self._assembler.assemble(
@@ -61,15 +59,15 @@ class ContextManager:
             profile_context=profile_context,
         )
 
-    def execute_tools(self, query: str) -> List[ToolOutput]:
-        results: List[ToolOutput] = []
+    def execute_tools(self, query: str) -> list[ToolOutput]:
+        results: list[ToolOutput] = []
         matched = self._tool_registry.match(query)
         for tool in matched:
             result = tool.run(query)
             results.append(result)
         return results
 
-    def detect_and_run_tools(self, query: str) -> List[ToolOutput]:
+    def detect_and_run_tools(self, query: str) -> list[ToolOutput]:
         return self.execute_tools(query)
 
     def set_file_lookup_store(self, user_id: str = "") -> None:

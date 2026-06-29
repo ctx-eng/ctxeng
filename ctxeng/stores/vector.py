@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.models import MemoryItem
 from ctxeng.stores.base import ContextStore
@@ -10,11 +10,10 @@ class VectorStore(ContextStore):
     def __init__(self, collection_name: str = "ctxeng", persist_directory: Optional[str] = None) -> None:
         try:
             import chromadb
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
-                "chromadb is required for VectorStore. "
-                "Install with: pip install 'ctxeng[vector]'"
-            )
+                "chromadb is required for VectorStore. Install with: pip install chromadb"
+            ) from exc
         if persist_directory:
             self._client = chromadb.PersistentClient(path=persist_directory)
         else:
@@ -34,7 +33,7 @@ class VectorStore(ContextStore):
         )
         return memory
 
-    def search(self, user_id: str, query: str, top_k: int = 10) -> List[MemoryItem]:
+    def search(self, user_id: str, query: str, top_k: int = 10) -> list[MemoryItem]:
         results = self._collection.query(
             query_texts=[query],
             n_results=top_k,
@@ -64,7 +63,7 @@ class VectorStore(ContextStore):
         except Exception:
             return False
 
-    def list(self, user_id: str) -> List[MemoryItem]:
+    def list(self, user_id: str) -> list[MemoryItem]:
         results = self._collection.get(where={"user_id": user_id})
         items = []
         if results["ids"]:

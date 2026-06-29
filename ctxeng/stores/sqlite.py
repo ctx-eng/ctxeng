@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.models import MemoryItem
 from ctxeng.stores.base import ContextStore
@@ -43,7 +43,7 @@ class SQLiteStore(ContextStore):
             self._conn.commit()
         return memory
 
-    def search(self, user_id: str, query: str, top_k: int = 10) -> List[MemoryItem]:
+    def search(self, user_id: str, query: str, top_k: int = 10) -> list[MemoryItem]:
         with self._lock:
             if query:
                 rows = self._conn.execute(
@@ -76,7 +76,7 @@ class SQLiteStore(ContextStore):
             self._conn.commit()
             return cursor.rowcount > 0
 
-    def list(self, user_id: str) -> List[MemoryItem]:
+    def list(self, user_id: str) -> list[MemoryItem]:
         with self._lock:
             rows = self._conn.execute(
                 "SELECT id, user_id, text, timestamp, metadata FROM memories WHERE user_id = ?",

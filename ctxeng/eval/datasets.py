@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Set
+from dataclasses import dataclass
 
 from ctxeng.models import MemoryItem
 
@@ -10,15 +9,15 @@ from ctxeng.models import MemoryItem
 class EvalQuery:
     user_id: str
     query: str
-    relevant_ids: Set[str]
+    relevant_ids: set[str]
 
 
 @dataclass
 class EvalDataset:
     name: str
     description: str
-    memories: List[MemoryItem]
-    queries: List[EvalQuery]
+    memories: list[MemoryItem]
+    queries: list[EvalQuery]
 
 
 def _build_simple_preferences() -> EvalDataset:
@@ -118,7 +117,7 @@ def _build_memory_retention() -> EvalDataset:
     )
 
 
-BUILT_IN_DATASETS: Dict[str, EvalDataset] = {
+BUILT_IN_DATASETS: dict[str, EvalDataset] = {
     "simple_preferences": _build_simple_preferences(),
     "multi_topic_conversations": _build_multi_topic(),
     "long_term_cross_session": _build_cross_session(),
@@ -132,5 +131,5 @@ def get_dataset(name: str) -> EvalDataset:
     raise KeyError(f"Unknown dataset: {name}. Available: {list(BUILT_IN_DATASETS.keys())}")
 
 
-def list_datasets() -> List[str]:
+def list_datasets() -> list[str]:
     return list(BUILT_IN_DATASETS.keys())

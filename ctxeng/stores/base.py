@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.models import MemoryItem
 
@@ -12,7 +12,7 @@ class ContextStore(ABC):
         ...
 
     @abstractmethod
-    def search(self, user_id: str, query: str, top_k: int = 10) -> List[MemoryItem]:
+    def search(self, user_id: str, query: str, top_k: int = 10) -> list[MemoryItem]:
         ...
 
     @abstractmethod
@@ -20,7 +20,7 @@ class ContextStore(ABC):
         ...
 
     @abstractmethod
-    def list(self, user_id: str) -> List[MemoryItem]:
+    def list(self, user_id: str) -> list[MemoryItem]:
         ...
 
     @abstractmethod

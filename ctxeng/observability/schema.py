@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 from uuid import uuid4
-
-from ctxeng.models import ConversationTurn, MemoryItem
 
 
 @dataclass
@@ -35,7 +32,7 @@ class ContextSpan:
 class ContextTrace:
     user_id: str
     query: str
-    spans: List[ContextSpan] = field(default_factory=list)
+    spans: list[ContextSpan] = field(default_factory=list)
     trace_id: str = field(default_factory=lambda: uuid4().hex)
     total_duration_ms: float = 0.0
     total_tokens: int = 0

@@ -3,23 +3,22 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter
-from typing import Callable, List, Optional
+from collections.abc import Callable
+from typing import Optional
 
 
-def _split_sentences(text: str) -> List[str]:
+def _split_sentences(text: str) -> list[str]:
     raw = re.split(r"(?<=[.!?])\s+", text)
     return [s.strip() for s in raw if s.strip()]
 
 
-def _tf_scores(sentences: List[str]) -> List[float]:
+def _tf_scores(sentences: list[str]) -> list[float]:
     word_freq: Counter = Counter()
     for sent in sentences:
         word_freq.update(sent.lower().split())
 
     if not word_freq:
         return [0.0] * len(sentences)
-
-    max_freq = max(word_freq.values())
 
     scores = []
     for i, sent in enumerate(sentences):
@@ -38,7 +37,7 @@ class ContextSummarizer:
         self,
         max_sentences: int = 3,
         keep_recent: int = 2,
-        summarize_fn: Optional[Callable[[str], str]] = None,
+        summarize_fn: Callable[[str], str] | None = None,
     ) -> None:
         self.max_sentences = max_sentences
         self.keep_recent = keep_recent
@@ -65,7 +64,7 @@ class ContextSummarizer:
 
     def sliding_window(
         self,
-        turns: List[str],
+        turns: list[str],
         window: Optional[int] = None,
     ) -> str:
         window = window or self.keep_recent

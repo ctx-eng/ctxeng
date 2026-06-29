@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 import csv
-import io
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ctxeng.models import MemoryItem
 
 
 class CSVIngestor:
-    def ingest(self, filepath: str, user_id: str, max_rows: int = 20) -> List[MemoryItem]:
+    def ingest(self, filepath: str, user_id: str, max_rows: int = 20) -> list[MemoryItem]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -22,7 +21,7 @@ class CSVIngestor:
         if not rows:
             return []
 
-        items: List[MemoryItem] = []
+        items: list[MemoryItem] = []
         source = path.name
 
         summary = f"CSV file: {source} | {len(rows)} rows | Columns: {', '.join(reader.fieldnames or [])}"
@@ -50,8 +49,8 @@ class JSONIngestor:
         user_id: str,
         source_name: str = "json_data",
         max_items: int = 20,
-    ) -> List[MemoryItem]:
-        items: List[MemoryItem] = []
+    ) -> list[MemoryItem]:
+        items: list[MemoryItem] = []
 
         if isinstance(data, dict):
             for key, value in data.items():
@@ -81,7 +80,7 @@ class JSONIngestor:
 
         return items
 
-    def ingest_file(self, filepath: str, user_id: str) -> List[MemoryItem]:
+    def ingest_file(self, filepath: str, user_id: str) -> list[MemoryItem]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {filepath}")

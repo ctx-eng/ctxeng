@@ -5,15 +5,12 @@ import pytest
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.eval.benchmark import BenchmarkRunner, format_benchmark_result
 from ctxeng.eval.datasets import (
-    EvalDataset,
-    EvalQuery,
     BUILT_IN_DATASETS,
     get_dataset,
     list_datasets,
 )
 from ctxeng.eval.judge import CorrectnessEvaluator
 from ctxeng.eval.metrics import CompressionMetrics, ContextMetrics
-from ctxeng.models import MemoryItem
 from ctxeng.retrieval.hybrid import HybridRetriever
 from ctxeng.stores.memory import InMemoryStore
 
@@ -156,7 +153,7 @@ class TestContextMetrics:
 
 class TestDatasets:
     def test_built_in_datasets_have_queries(self) -> None:
-        for name, ds in BUILT_IN_DATASETS.items():
+        for _name, ds in BUILT_IN_DATASETS.items():
             assert len(ds.queries) > 0
             assert len(ds.memories) > 0
             assert len(ds.name) > 0

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Set
-
 
 class CompressionMetrics:
     @staticmethod
@@ -12,8 +10,8 @@ class CompressionMetrics:
 
     @staticmethod
     def fact_preservation_rate(
-        original_facts: Set[str],
-        compressed_facts: Set[str],
+        original_facts: set[str],
+        compressed_facts: set[str],
     ) -> float:
         if not original_facts:
             return 1.0
@@ -33,8 +31,8 @@ class CompressionMetrics:
 class ContextMetrics:
     @staticmethod
     def precision_at_k(
-        retrieved: List[str],
-        relevant: Set[str],
+        retrieved: list[str],
+        relevant: set[str],
         k: int,
     ) -> float:
         if k <= 0 or not retrieved:
@@ -47,8 +45,8 @@ class ContextMetrics:
 
     @staticmethod
     def recall_at_k(
-        retrieved: List[str],
-        relevant: Set[str],
+        retrieved: list[str],
+        relevant: set[str],
         k: int,
     ) -> float:
         if not relevant:
@@ -61,8 +59,8 @@ class ContextMetrics:
 
     @staticmethod
     def reciprocal_rank(
-        retrieved: List[str],
-        relevant: Set[str],
+        retrieved: list[str],
+        relevant: set[str],
     ) -> float:
         for i, r in enumerate(retrieved):
             if r in relevant:
@@ -71,8 +69,8 @@ class ContextMetrics:
 
     @staticmethod
     def mrr(
-        queries: List[List[str]],
-        relevants: List[Set[str]],
+        queries: list[list[str]],
+        relevants: list[set[str]],
     ) -> float:
         if not queries:
             return 0.0
@@ -102,8 +100,8 @@ class ContextMetrics:
 
     @staticmethod
     def average_precision(
-        retrieved: List[str],
-        relevant: Set[str],
+        retrieved: list[str],
+        relevant: set[str],
     ) -> float:
         if not relevant:
             return 0.0

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ctxeng.ingestion.image import ImageIngestor
 from ctxeng.ingestion.structured import CSVIngestor, JSONIngestor
@@ -19,7 +19,7 @@ class FileIngestor:
         self.csv_ingestor = CSVIngestor()
         self.json_ingestor = JSONIngestor()
 
-    def ingest(self, filepath: str, user_id: str) -> List[MemoryItem]:
+    def ingest(self, filepath: str, user_id: str) -> list[MemoryItem]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {filepath}")

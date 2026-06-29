@@ -7,7 +7,10 @@ from ctxeng.tools.base import BaseTool, ToolOutput
 
 class CalculatorTool(BaseTool):
     name = "calculator"
-    description = "Evaluate a mathematical expression. Input: a math expression like '2 + 3 * 4'. Supports +, -, *, /, **, %, //, and parentheses."
+    description = (
+        "Evaluate a mathematical expression. Input: a math expression like '2 + 3 * 4'."
+        " Supports +, -, *, /, **, %, //, and parentheses."
+    )
 
     def run(self, input_str: str) -> ToolOutput:
         start = time.perf_counter()

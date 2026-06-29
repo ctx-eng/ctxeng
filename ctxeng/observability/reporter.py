@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from typing import List
-
-from ctxeng.observability.schema import ContextSpan, ContextTrace
+from ctxeng.observability.schema import ContextTrace
 
 
-def _format_trace_lines(trace: ContextTrace) -> List[str]:
-    lines: List[str] = []
+def _format_trace_lines(trace: ContextTrace) -> list[str]:
+    lines: list[str] = []
     lines.append(f"Context trace #{trace.trace_id}")
     lines.append(f"User: {trace.user_id}  Query: {trace.query[:60]}")
     lines.append("")

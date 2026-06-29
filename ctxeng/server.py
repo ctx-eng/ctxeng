@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.core.context_manager import ContextManager
@@ -13,7 +13,7 @@ from ctxeng.core.profile import ProfileStore
 from ctxeng.llm.base import LLMMessage
 from ctxeng.llm.chat import generate_reply
 from ctxeng.llm.openai import OpenAIProvider
-from ctxeng.models import ConversationTurn, MemoryItem
+from ctxeng.models import ConversationTurn
 from ctxeng.observability.reporter import format_trace
 from ctxeng.observability.tracer import ContextTracer, get_trace
 from ctxeng.stores.memory import InMemoryStore
@@ -25,7 +25,7 @@ _assembler = ContextAssembler(store=_store)
 _tracer = ContextTracer(_assembler)
 _profile_store = ProfileStore()
 _mgr = ContextManager(memory_store=_store, profile_store=_profile_store)
-_llm: Optional[OpenAIProvider] = None
+_llm: OpenAIProvider | None = None
 
 
 def _get_llm() -> OpenAIProvider:
@@ -46,7 +46,7 @@ class SearchMemoryRequest(BaseModel):
 
 class BuildPromptRequest(BaseModel):
     user_id: str
-    turns: List[ConversationTurn]
+    turns: list[ConversationTurn]
     current_query: str
 
 
@@ -77,7 +77,7 @@ class TraceResponse(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: List[LLMMessage]
+    messages: list[LLMMessage]
 
 
 class ChatResponse(BaseModel):
@@ -98,7 +98,7 @@ class ToolOutputModel(BaseModel):
 
 
 class ToolExecuteResponse(BaseModel):
-    tool_outputs: List[ToolOutputModel]
+    tool_outputs: list[ToolOutputModel]
 
 
 CHAT_HTML = (Path(__file__).resolve().parent / "static" / "chat.html").read_text(encoding="utf-8")
@@ -126,7 +126,7 @@ def add_memory(body: AddMemoryRequest) -> MemoryResponse:
 
 
 @app.get("/memories/{user_id}")
-def search_memories(user_id: str, query: str = "") -> List[MemoryResponse]:
+def search_memories(user_id: str, query: str = "") -> list[MemoryResponse]:
     results = _store.search(user_id, query) if query else _store.list(user_id)
     return [
         MemoryResponse(
@@ -149,7 +149,7 @@ def build_prompt(body: BuildPromptRequest) -> PromptResponse:
             tool_outputs=tool_outputs, profile_context=profile_context,
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     return PromptResponse(prompt=prompt)
 
 
@@ -165,10 +165,10 @@ def chat(body: ChatRequest) -> ChatResponse:
             raise HTTPException(status_code=400, detail="Need system and user messages")
         resp = generate_reply(_get_llm(), system_msg.content, user_msg.content)
         return ChatResponse(content=resp.content, finish_reason=resp.finish_reason)
-    except ImportError:
-        raise HTTPException(status_code=503, detail="LLM provider not available (install openai)")
+    except ImportError as exc:
+        raise HTTPException(status_code=503, detail="LLM provider not available (install openai)") from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.post("/tools/execute", response_model=ToolExecuteResponse)
@@ -189,7 +189,7 @@ def execute_tools(body: ToolExecuteRequest) -> ToolExecuteResponse:
 
 
 @app.get("/tools")
-def list_tools() -> List[str]:
+def list_tools() -> list[str]:
     return _mgr._tool_registry.list()
 
 
@@ -211,7 +211,7 @@ class ProfileResponse(BaseModel):
     user_id: str
     name: str
     preferences: dict
-    tags: List[str]
+    tags: list[str]
 
 
 @app.get("/profile/{user_id}", response_model=ProfileResponse)
@@ -243,7 +243,7 @@ def explain_prompt(body: BuildPromptRequest) -> ExplainResponse:
             tool_outputs=tool_outputs, profile_context=profile_context,
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     return ExplainResponse(
         prompt=prompt,
         trace_id=trace.trace_id,

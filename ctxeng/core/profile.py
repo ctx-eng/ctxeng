@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from uuid import uuid4
+from typing import Any
 
 
 @dataclass
@@ -18,18 +17,18 @@ class Preference:
 class UserProfile:
     user_id: str
     name: str = ""
-    preferences: Dict[str, Preference] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    preferences: dict[str, Preference] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: str = ""
     updated_at: str = ""
 
 
 class ProfileStore:
     def __init__(self) -> None:
-        self._profiles: Dict[str, UserProfile] = {}
+        self._profiles: dict[str, UserProfile] = {}
 
-    def get(self, user_id: str) -> Optional[UserProfile]:
+    def get(self, user_id: str) -> UserProfile | None:
         return self._profiles.get(user_id)
 
     def get_or_create(self, user_id: str, name: str = "") -> UserProfile:
@@ -47,13 +46,13 @@ class ProfileStore:
         profile.updated_at = datetime.utcnow().isoformat()
         return pref
 
-    def get_preference(self, user_id: str, key: str) -> Optional[Preference]:
+    def get_preference(self, user_id: str, key: str) -> Preference | None:
         profile = self.get(user_id)
         if profile is None:
             return None
         return profile.preferences.get(key)
 
-    def set_tags(self, user_id: str, tags: List[str]) -> None:
+    def set_tags(self, user_id: str, tags: list[str]) -> None:
         profile = self.get_or_create(user_id)
         profile.tags = tags
         profile.updated_at = datetime.utcnow().isoformat()
@@ -64,7 +63,7 @@ class ProfileStore:
         if profile is None:
             return "- no profile"
 
-        parts: List[str] = []
+        parts: list[str] = []
         if profile.name:
             parts.append(f"Name: {profile.name}")
         if profile.tags:
