@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from ctxeng.assembly.assembler import ContextAssembler
+from ctxeng.llm.base import LLMMessage
+from ctxeng.llm.chat import generate_reply
+from ctxeng.llm.openai import OpenAIProvider
 from ctxeng.models import ConversationTurn, MemoryItem
 from ctxeng.observability.reporter import format_trace
 from ctxeng.observability.tracer import ContextTracer, get_trace
@@ -16,6 +21,14 @@ app = FastAPI(title="CtxEng API", version="0.1.0")
 _store = InMemoryStore()
 _assembler = ContextAssembler(store=_store)
 _tracer = ContextTracer(_assembler)
+_llm: Optional[OpenAIProvider] = None
+
+
+def _get_llm() -> OpenAIProvider:
+    global _llm
+    if _llm is None:
+        _llm = OpenAIProvider()
+    return _llm
 
 
 class AddMemoryRequest(BaseModel):
@@ -59,9 +72,26 @@ class TraceResponse(BaseModel):
     total_tokens: int
 
 
+class ChatRequest(BaseModel):
+    messages: List[LLMMessage]
+
+
+class ChatResponse(BaseModel):
+    content: str
+    finish_reason: str = "stop"
+
+
+CHAT_HTML = (Path(__file__).resolve().parent / "static" / "chat.html").read_text(encoding="utf-8")
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/", response_class=HTMLResponse)
+def chat_ui():
+    return HTMLResponse(CHAT_HTML)
 
 
 @app.post("/memories", status_code=201)
@@ -96,6 +126,24 @@ def build_prompt(body: BuildPromptRequest) -> PromptResponse:
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     return PromptResponse(prompt=prompt)
+
+
+@app.post("/chat", response_model=ChatResponse)
+def chat(body: ChatRequest) -> ChatResponse:
+    try:
+        msgs = body.messages
+        if not msgs:
+            raise HTTPException(status_code=400, detail="No messages")
+        system_msg = next((m for m in msgs if m.role == "system"), None)
+        user_msg = next((m for m in msgs if m.role == "user"), None)
+        if not system_msg or not user_msg:
+            raise HTTPException(status_code=400, detail="Need system and user messages")
+        resp = generate_reply(_get_llm(), system_msg.content, user_msg.content)
+        return ChatResponse(content=resp.content, finish_reason=resp.finish_reason)
+    except ImportError:
+        raise HTTPException(status_code=503, detail="LLM provider not available (install openai)")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @app.post("/context/explain", response_model=ExplainResponse)
