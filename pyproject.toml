@@ -13,13 +13,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
+templates = ["jinja2>=3.1"]
 retrieval = ["rank-bm25>=0.2"]
 vector = [
     "sentence-transformers>=3.0",
     "numpy>=1.24",
 ]
 all = [
-    "ctxeng[retrieval, vector]",
+    "ctxeng[templates, retrieval, vector]",
 ]
 test = ["httpx>=0.28"]
 
