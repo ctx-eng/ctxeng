@@ -91,10 +91,38 @@ def _build_cross_session() -> EvalDataset:
     )
 
 
+def _build_memory_retention() -> EvalDataset:
+    memories = [
+        MemoryItem(user_id="charlie", text="My favorite book is Dune.", id="m1"),
+        MemoryItem(user_id="charlie", text="I have a dog named Max.", id="m2"),
+        MemoryItem(user_id="charlie", text="I work as a data scientist.", id="m3"),
+        MemoryItem(user_id="charlie", text="I visited Japan last year.", id="m4"),
+        MemoryItem(user_id="charlie", text="I enjoy playing the guitar.", id="m5"),
+        MemoryItem(user_id="charlie", text="My team uses Kubernetes.", id="m6"),
+        MemoryItem(user_id="charlie", text="I am learning Mandarin Chinese.", id="m7"),
+    ]
+    queries = [
+        EvalQuery(user_id="charlie", query="What is my favorite book?", relevant_ids={"m1"}),
+        EvalQuery(user_id="charlie", query="What pet do I have?", relevant_ids={"m2"}),
+        EvalQuery(user_id="charlie", query="What is my job?", relevant_ids={"m3"}),
+        EvalQuery(user_id="charlie", query="Where did I travel recently?", relevant_ids={"m4"}),
+        EvalQuery(user_id="charlie", query="What instrument do I play?", relevant_ids={"m5"}),
+        EvalQuery(user_id="charlie", query="What orchestration tool does my team use?", relevant_ids={"m6"}),
+        EvalQuery(user_id="charlie", query="What language am I studying?", relevant_ids={"m7"}),
+    ]
+    return EvalDataset(
+        name="memory_retention",
+        description="7 distinct personal facts to test memory recall across turns",
+        memories=memories,
+        queries=queries,
+    )
+
+
 BUILT_IN_DATASETS: Dict[str, EvalDataset] = {
     "simple_preferences": _build_simple_preferences(),
     "multi_topic_conversations": _build_multi_topic(),
     "long_term_cross_session": _build_cross_session(),
+    "memory_retention": _build_memory_retention(),
 }
 
 

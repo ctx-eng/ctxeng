@@ -11,13 +11,71 @@ from ctxeng.eval.datasets import (
     get_dataset,
     list_datasets,
 )
-from ctxeng.eval.metrics import ContextMetrics
+from ctxeng.eval.judge import CorrectnessEvaluator
+from ctxeng.eval.metrics import CompressionMetrics, ContextMetrics
 from ctxeng.models import MemoryItem
 from ctxeng.retrieval.hybrid import HybridRetriever
 from ctxeng.stores.memory import InMemoryStore
 
 
 class TestContextMetrics:
+    def test_compression_ratio(self) -> None:
+        assert CompressionMetrics.compression_ratio(100, 50) == 0.5
+        assert CompressionMetrics.compression_ratio(100, 100) == 0.0
+        assert CompressionMetrics.compression_ratio(0, 0) == 0.0
+
+    def test_fact_preservation_full(self) -> None:
+        assert CompressionMetrics.fact_preservation_rate({"a", "b"}, {"a", "b"}) == 1.0
+
+    def test_fact_preservation_partial(self) -> None:
+        assert CompressionMetrics.fact_preservation_rate({"a", "b", "c"}, {"a", "b"}) == 2 / 3
+
+    def test_fact_preservation_empty_original(self) -> None:
+        assert CompressionMetrics.fact_preservation_rate(set(), {"a"}) == 1.0
+
+    def test_information_density(self) -> None:
+        assert CompressionMetrics.information_density(5, 100) == 0.05
+        assert CompressionMetrics.information_density(0, 100) == 0.0
+
+    def test_correctness_evaluator_no_reference(self) -> None:
+        evaluator = CorrectnessEvaluator()
+        result = evaluator.evaluate("question", "answer")
+        assert result.score == 0.0
+        assert "No reference" in result.explanation
+
+    def test_correctness_evaluator_with_reference(self) -> None:
+        evaluator = CorrectnessEvaluator()
+        result = evaluator.evaluate(
+            "What color is the sky?",
+            "The sky is blue.",
+            "The sky appears blue.",
+        )
+        assert 0.0 < result.score <= 1.0
+
+    def test_correctness_evaluator_no_overlap(self) -> None:
+        evaluator = CorrectnessEvaluator()
+        result = evaluator.evaluate(
+            "What is 2+2?",
+            "blue sky ocean waves",
+            "answer equals four exactly",
+        )
+        assert result.score == 0.0
+
+    def test_memory_retention_dataset_loaded(self) -> None:
+        from ctxeng.eval.datasets import BUILT_IN_DATASETS
+        assert "memory_retention" in BUILT_IN_DATASETS
+        ds = BUILT_IN_DATASETS["memory_retention"]
+        assert len(ds.memories) == 7
+        assert len(ds.queries) == 7
+
+    def test_memory_retention_benchmark(self) -> None:
+        store = InMemoryStore()
+        retriever = HybridRetriever(store)
+        assembler = ContextAssembler(store=store)
+        runner = BenchmarkRunner(store, retriever, assembler)
+        result = runner.run_dataset(BUILT_IN_DATASETS["memory_retention"])
+        assert result.num_queries == 7
+
     def test_precision_at_k_exact(self) -> None:
         assert ContextMetrics.precision_at_k(["a", "b"], {"a"}, 1) == 1.0
 

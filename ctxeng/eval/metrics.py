@@ -3,6 +3,33 @@ from __future__ import annotations
 from typing import List, Set
 
 
+class CompressionMetrics:
+    @staticmethod
+    def compression_ratio(original_tokens: int, compressed_tokens: int) -> float:
+        if original_tokens <= 0:
+            return 0.0
+        return 1.0 - (compressed_tokens / original_tokens)
+
+    @staticmethod
+    def fact_preservation_rate(
+        original_facts: Set[str],
+        compressed_facts: Set[str],
+    ) -> float:
+        if not original_facts:
+            return 1.0
+        preserved = original_facts & compressed_facts
+        return len(preserved) / len(original_facts)
+
+    @staticmethod
+    def information_density(
+        fact_count: int,
+        total_tokens: int,
+    ) -> float:
+        if total_tokens <= 0:
+            return 0.0
+        return fact_count / total_tokens
+
+
 class ContextMetrics:
     @staticmethod
     def precision_at_k(
