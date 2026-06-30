@@ -29,16 +29,15 @@ class PromptTemplate:
         return re.findall(r"\{(\w+)\}", self._template)
 
     def render(self, **kwargs: str) -> str:
-        has_jinja = False
-        try:
-            from jinja2 import Template
-            has_jinja = True
-        except ImportError:
-            pass
+        uses_jinja_syntax = "{{" in self._template or "{%" in self._template
 
-        if has_jinja:
-            from jinja2 import Template
-            return Template(self._template).render(**kwargs)
+        if uses_jinja_syntax:
+            try:
+                from jinja2 import Template
+
+                return Template(self._template).render(**kwargs)
+            except ImportError:
+                pass
 
         missing = [k for k in self.slots if k not in kwargs]
         if missing:
