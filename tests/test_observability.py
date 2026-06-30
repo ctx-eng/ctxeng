@@ -38,7 +38,9 @@ class TestContextSpan:
         assert len(span.id) > 0
 
     def test_parent_id_optional(self) -> None:
-        child = ContextSpan(stage="child", input={}, output={}, duration_ms=0, parent_id="parent123")
+        child = ContextSpan(
+            stage="child", input={}, output={}, duration_ms=0, parent_id="parent123"
+        )
         assert child.parent_id == "parent123"
         orphan = ContextSpan(stage="orphan", input={}, output={}, duration_ms=0)
         assert orphan.parent_id is None
@@ -157,7 +159,9 @@ class TestReporter:
 
     def test_format_trace_short_compact(self) -> None:
         trace = ContextTrace(user_id="alice", query="hello")
-        trace.add_span(ContextSpan(stage="retrieve", input={}, output={"item_count": 3}, duration_ms=10))
+        trace.add_span(
+            ContextSpan(stage="retrieve", input={}, output={"item_count": 3}, duration_ms=10)
+        )
         short = format_trace_short(trace)
         assert trace.trace_id in short
         assert "retrieve" in short

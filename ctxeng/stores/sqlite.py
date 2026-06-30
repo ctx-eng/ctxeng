@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
-from typing import Optional
 
 from ctxeng.models import MemoryItem
 from ctxeng.stores.base import ContextStore
@@ -24,12 +23,10 @@ class SQLiteStore(ContextStore):
             )
             """
         )
-        self._conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_user_id ON memories (user_id)"
-        )
+        self._conn.execute("CREATE INDEX IF NOT EXISTS idx_user_id ON memories (user_id)")
         self._conn.commit()
 
-    def add(self, user_id: str, text: str, metadata: Optional[dict] = None) -> MemoryItem:
+    def add(self, user_id: str, text: str, metadata: dict | None = None) -> MemoryItem:
         memory = MemoryItem(
             user_id=user_id,
             text=text,
@@ -38,7 +35,13 @@ class SQLiteStore(ContextStore):
         with self._lock:
             self._conn.execute(
                 "INSERT INTO memories (id, user_id, text, timestamp, metadata) VALUES (?, ?, ?, ?, ?)",
-                (memory.id, memory.user_id, memory.text, memory.timestamp, json.dumps(memory.metadata)),
+                (
+                    memory.id,
+                    memory.user_id,
+                    memory.text,
+                    memory.timestamp,
+                    json.dumps(memory.metadata),
+                ),
             )
             self._conn.commit()
         return memory

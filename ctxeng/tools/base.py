@@ -20,8 +20,7 @@ class BaseTool(ABC):
     description: str = ""
 
     @abstractmethod
-    def run(self, input_str: str) -> ToolOutput:
-        ...
+    def run(self, input_str: str) -> ToolOutput: ...
 
     def to_openai_tool(self) -> dict[str, Any]:
         return {
@@ -31,15 +30,10 @@ class BaseTool(ABC):
                 "description": self.description,
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "input": {
-                            "type": "string",
-                            "description": "Tool input"
-                        }
-                    },
-                    "required": ["input"]
-                }
-            }
+                    "properties": {"input": {"type": "string", "description": "Tool input"}},
+                    "required": ["input"],
+                },
+            },
         }
 
 

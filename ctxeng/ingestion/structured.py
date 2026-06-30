@@ -24,20 +24,26 @@ class CSVIngestor:
         items: list[MemoryItem] = []
         source = path.name
 
-        summary = f"CSV file: {source} | {len(rows)} rows | Columns: {', '.join(reader.fieldnames or [])}"
-        items.append(MemoryItem(
-            user_id=user_id,
-            text=summary,
-            metadata={"source": source, "type": "csv_summary"},
-        ))
+        summary = (
+            f"CSV file: {source} | {len(rows)} rows | Columns: {', '.join(reader.fieldnames or [])}"
+        )
+        items.append(
+            MemoryItem(
+                user_id=user_id,
+                text=summary,
+                metadata={"source": source, "type": "csv_summary"},
+            )
+        )
 
         for i, row in enumerate(rows[:max_rows]):
             desc = "; ".join(f"{k}: {v}" for k, v in row.items() if v)
-            items.append(MemoryItem(
-                user_id=user_id,
-                text=desc,
-                metadata={"source": source, "type": "csv_row", "row": i},
-            ))
+            items.append(
+                MemoryItem(
+                    user_id=user_id,
+                    text=desc,
+                    metadata={"source": source, "type": "csv_row", "row": i},
+                )
+            )
 
         return items
 
@@ -55,28 +61,34 @@ class JSONIngestor:
         if isinstance(data, dict):
             for key, value in data.items():
                 desc = self._describe(key, value)
-                items.append(MemoryItem(
-                    user_id=user_id,
-                    text=desc,
-                    metadata={"source": source_name, "type": "json_field", "field": key},
-                ))
+                items.append(
+                    MemoryItem(
+                        user_id=user_id,
+                        text=desc,
+                        metadata={"source": source_name, "type": "json_field", "field": key},
+                    )
+                )
                 if len(items) >= max_items:
                     break
 
         elif isinstance(data, list):
             summary = f"JSON array: {len(data)} items from {source_name}"
-            items.append(MemoryItem(
-                user_id=user_id,
-                text=summary,
-                metadata={"source": source_name, "type": "json_summary"},
-            ))
+            items.append(
+                MemoryItem(
+                    user_id=user_id,
+                    text=summary,
+                    metadata={"source": source_name, "type": "json_summary"},
+                )
+            )
             for i, item in enumerate(data[:max_items]):
                 desc = self._describe(f"item_{i}", item)
-                items.append(MemoryItem(
-                    user_id=user_id,
-                    text=desc,
-                    metadata={"source": source_name, "type": "json_item", "index": i},
-                ))
+                items.append(
+                    MemoryItem(
+                        user_id=user_id,
+                        text=desc,
+                        metadata={"source": source_name, "type": "json_item", "index": i},
+                    )
+                )
 
         return items
 

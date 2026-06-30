@@ -92,11 +92,11 @@ class BenchmarkRunner:
                 )
                 total_tok = _estimate_tokens(prompt)
                 relevant_tok = sum(
-                    _estimate_tokens(m.text)
-                    for m in retrieved
-                    if m.id in eq.relevant_ids
+                    _estimate_tokens(m.text) for m in retrieved if m.id in eq.relevant_ids
                 )
-                qr.token_efficiency = round(ContextMetrics.token_efficiency(relevant_tok, total_tok), 4)
+                qr.token_efficiency = round(
+                    ContextMetrics.token_efficiency(relevant_tok, total_tok), 4
+                )
                 qr.total_tokens = total_tok
             except Exception:
                 pass
@@ -109,14 +109,28 @@ class BenchmarkRunner:
         return BenchmarkResult(
             dataset_name=dataset.name,
             num_queries=len(query_results),
-            avg_precision_at_1=round(sum(q.precision_at_1 for q in query_results) / len(query_results), 4),
-            avg_precision_at_3=round(sum(q.precision_at_3 for q in query_results) / len(query_results), 4),
-            avg_precision_at_5=round(sum(q.precision_at_5 for q in query_results) / len(query_results), 4),
-            avg_recall_at_3=round(sum(q.recall_at_3 for q in query_results) / len(query_results), 4),
-            avg_recall_at_5=round(sum(q.recall_at_5 for q in query_results) / len(query_results), 4),
+            avg_precision_at_1=round(
+                sum(q.precision_at_1 for q in query_results) / len(query_results), 4
+            ),
+            avg_precision_at_3=round(
+                sum(q.precision_at_3 for q in query_results) / len(query_results), 4
+            ),
+            avg_precision_at_5=round(
+                sum(q.precision_at_5 for q in query_results) / len(query_results), 4
+            ),
+            avg_recall_at_3=round(
+                sum(q.recall_at_3 for q in query_results) / len(query_results), 4
+            ),
+            avg_recall_at_5=round(
+                sum(q.recall_at_5 for q in query_results) / len(query_results), 4
+            ),
             mrr=round(ContextMetrics.mrr(all_retrieved, all_relevant), 4),
-            map_score=round(sum(q.average_precision for q in query_results) / len(query_results), 4),
-            avg_token_efficiency=round(sum(q.token_efficiency for q in query_results) / len(query_results), 4),
+            map_score=round(
+                sum(q.average_precision for q in query_results) / len(query_results), 4
+            ),
+            avg_token_efficiency=round(
+                sum(q.token_efficiency for q in query_results) / len(query_results), 4
+            ),
             avg_latency_ms=round(sum(q.latency_ms for q in query_results) / len(query_results), 2),
             total_duration_ms=round(sum(q.latency_ms for q in query_results), 2),
             queries=query_results,

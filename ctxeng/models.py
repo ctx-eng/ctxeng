@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 from uuid import uuid4
 
 
@@ -15,7 +14,7 @@ class ConversationTurn:
 class MemoryItem:
     user_id: str
     text: str
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
     id: str = field(default_factory=lambda: uuid4().hex)
     metadata: dict = field(default_factory=dict)
     score: float = 0.0

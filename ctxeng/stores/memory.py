@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from ctxeng.models import MemoryItem
 from ctxeng.stores.base import ContextStore
 
@@ -10,7 +8,7 @@ class InMemoryStore(ContextStore):
     def __init__(self) -> None:
         self._memories: list[MemoryItem] = []
 
-    def add(self, user_id: str, text: str, metadata: Optional[dict] = None) -> MemoryItem:
+    def add(self, user_id: str, text: str, metadata: dict | None = None) -> MemoryItem:
         memory = MemoryItem(
             user_id=user_id,
             text=text,
@@ -22,9 +20,7 @@ class InMemoryStore(ContextStore):
     def search(self, user_id: str, query: str, top_k: int = 10) -> list[MemoryItem]:
         query_lower = query.lower()
         matches = [
-            m
-            for m in self._memories
-            if m.user_id == user_id and query_lower in m.text.lower()
+            m for m in self._memories if m.user_id == user_id and query_lower in m.text.lower()
         ]
         if matches:
             for m in matches:

@@ -46,6 +46,7 @@ class BM25Retriever:
             return
         try:
             from rank_bm25 import BM25Okapi
+
             tokenized = [_tokenize(t) for t in texts]
             self._bm25 = BM25Okapi(tokenized)
         except ImportError:
@@ -85,9 +86,7 @@ class HybridRetriever:
         if self.embedder.available and n > 0:
             query_emb = self.embedder.encode_query(query)
             candidate_embs = self.embedder.encode(texts)
-            dense_scores = [
-                _cosine_similarity(query_emb, cand_emb) for cand_emb in candidate_embs
-            ]
+            dense_scores = [_cosine_similarity(query_emb, cand_emb) for cand_emb in candidate_embs]
         else:
             dense_scores = [0.0] * n
 

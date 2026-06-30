@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ctxeng.llm.base import LLMProvider
 
@@ -21,7 +20,7 @@ class CorrectnessEvaluator:
         self,
         question: str,
         answer: str,
-        reference: Optional[str] = None,
+        reference: str | None = None,
     ) -> CorrectnessScore:
         if self._provider is not None:
             return self._llm_judge(question, answer, reference)
@@ -31,7 +30,7 @@ class CorrectnessEvaluator:
         self,
         question: str,
         answer: str,
-        reference: Optional[str] = None,
+        reference: str | None = None,
     ) -> CorrectnessScore:
         ref_text = reference or "No reference provided"
         prompt = (
@@ -50,12 +49,18 @@ class CorrectnessEvaluator:
         )
         try:
             from ctxeng.llm.base import LLMMessage
-            resp = self._provider.generate([
-                LLMMessage(role="system", content="You are a strict but fair answer evaluator."),
-                LLMMessage(role="user", content=prompt),
-            ])
+
+            resp = self._provider.generate(
+                [
+                    LLMMessage(
+                        role="system", content="You are a strict but fair answer evaluator."
+                    ),
+                    LLMMessage(role="user", content=prompt),
+                ]
+            )
             text = resp.content.strip()
             import re
+
             match = re.search(r"([01]\.\d+|1\.0|0\.0)", text)
             score = float(match.group(1)) if match else 0.5
             score = max(0.0, min(1.0, score))
@@ -68,7 +73,7 @@ class CorrectnessEvaluator:
         self,
         question: str,
         answer: str,
-        reference: Optional[str] = None,
+        reference: str | None = None,
     ) -> CorrectnessScore:
         if not reference:
             return CorrectnessScore(score=0.0, explanation="No reference answer for comparison")

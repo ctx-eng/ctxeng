@@ -74,10 +74,7 @@ class ContextMetrics:
     ) -> float:
         if not queries:
             return 0.0
-        total = sum(
-            ContextMetrics.reciprocal_rank(q, rel)
-            for q, rel in zip(queries, relevants)
-        )
+        total = sum(ContextMetrics.reciprocal_rank(q, rel) for q, rel in zip(queries, relevants))
         return total / len(queries)
 
     @staticmethod

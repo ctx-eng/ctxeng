@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from ctxeng.llm.base import LLMMessage, LLMProvider, LLMResponse
 
 
@@ -9,15 +7,13 @@ class OpenAIProvider(LLMProvider):
     def __init__(
         self,
         model: str = "gpt-4o-mini",
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
     ) -> None:
         try:
             from openai import OpenAI
         except ImportError as exc:
-            raise ImportError(
-                "openai SDK is required. Install with: pip install openai"
-            ) from exc
+            raise ImportError("openai SDK is required. Install with: pip install openai") from exc
         self._model = model
         self._client = OpenAI(api_key=api_key, base_url=base_url)
 

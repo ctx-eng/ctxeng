@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 from uuid import uuid4
 
 
@@ -12,7 +11,7 @@ class ContextSpan:
     output: dict
     duration_ms: float
     token_count: int = 0
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     id: str = field(default_factory=lambda: uuid4().hex)
 
     @property

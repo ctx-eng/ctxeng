@@ -6,4 +6,5 @@ concrete implementations:
 * ``InMemoryStore`` — ephemeral, in-process storage
 * ``SQLiteStore``   — file-backed persistent storage via sqlite3
 * ``VectorStore``   — embedding-powered storage via ChromaDB
+* ``TieredStore``   — composable three-tier fallback (working → episodic → long-term)
 """

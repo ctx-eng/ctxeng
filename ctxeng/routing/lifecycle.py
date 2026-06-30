@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ctxeng.stores.base import ContextStore
 
@@ -39,7 +38,7 @@ class LifecycleManager:
             self._records[memory_id] = rec
         return rec
 
-    def get_state(self, memory_id: str) -> Optional[str]:
+    def get_state(self, memory_id: str) -> str | None:
         rec = self._records.get(memory_id)
         return rec.state if rec else None
 
@@ -73,10 +72,7 @@ class LifecycleManager:
         return archived
 
     def prune_dead(self) -> int:
-        dead_ids = [
-            mid for mid, rec in self._records.items()
-            if rec.state == "dead"
-        ]
+        dead_ids = [mid for mid, rec in self._records.items() if rec.state == "dead"]
         for mid in dead_ids:
             self.store.delete(mid)
             del self._records[mid]

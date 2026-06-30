@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from ctxeng.models import MemoryItem
 
 
 def _trigram_similarity(a: str, b: str) -> float:
     def trigrams(s: str) -> set:
-        return {s[i:i+3] for i in range(len(s) - 2)}
+        return {s[i : i + 3] for i in range(len(s) - 2)}
+
     t1 = trigrams(a.lower())
     t2 = trigrams(b.lower())
     if not t1 or not t2:
@@ -38,7 +37,7 @@ class Prioritizer:
                 kept.append(item)
         return kept
 
-    def prioritize(self, items: list[MemoryItem], top_k: Optional[int] = None) -> list[MemoryItem]:
+    def prioritize(self, items: list[MemoryItem], top_k: int | None = None) -> list[MemoryItem]:
         if not items:
             return []
 
@@ -54,9 +53,7 @@ class Prioritizer:
             mmr_scores = []
             for c in candidates:
                 rel = c.score
-                div = max(
-                    _trigram_similarity(c.text, s.text) for s in selected
-                )
+                div = max(_trigram_similarity(c.text, s.text) for s in selected)
                 mmr = self.diversity_weight * rel - (1 - self.diversity_weight) * div
                 mmr_scores.append(mmr)
 

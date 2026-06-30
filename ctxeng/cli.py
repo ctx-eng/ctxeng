@@ -20,7 +20,9 @@ def run_cli() -> None:
     turns: list[ConversationTurn] = []
     last_trace: ContextTrace | None = None
 
-    print("CtxEng CLI — type your messages. Commands: /help, /memories, /trace, /eval, /tools, /exit")
+    print(
+        "CtxEng CLI — type your messages. Commands: /help, /memories, /trace, /eval, /tools, /exit"
+    )
 
     user_id = "cli-user"
 

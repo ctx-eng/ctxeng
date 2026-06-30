@@ -8,7 +8,9 @@ from ctxeng.tools.base import BaseTool, ToolOutput
 
 class FileLookupTool(BaseTool):
     name = "file_lookup"
-    description = "Search stored memories by keyword. Input: a search term to find matching memories."
+    description = (
+        "Search stored memories by keyword. Input: a search term to find matching memories."
+    )
 
     def __init__(self, store: ContextStore | None = None, user_id: str = "") -> None:
         super().__init__()

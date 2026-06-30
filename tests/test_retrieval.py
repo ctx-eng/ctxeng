@@ -200,10 +200,7 @@ class TestCrossEncoderReranker:
         from ctxeng.retrieval.reranker import CrossEncoderReranker
 
         reranker = CrossEncoderReranker()
-        candidates = [
-            MemoryItem(user_id="alice", text=f"memory {i}")
-            for i in range(10)
-        ]
+        candidates = [MemoryItem(user_id="alice", text=f"memory {i}") for i in range(10)]
         results = reranker.rerank("memory", candidates, top_k=3)
         assert len(results) == 3
 

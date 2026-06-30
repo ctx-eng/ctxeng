@@ -53,8 +53,11 @@ class TestPromptTemplate:
         t = get_template("default")
         assert t is not None
         result = t.render(
-            profile="- no profile", memories="- foo", history="- bar",
-            tool_outputs="- none", query="test",
+            profile="- no profile",
+            memories="- foo",
+            history="- bar",
+            tool_outputs="- none",
+            query="test",
         )
         assert "Relevant memories:" in result
         assert "- foo" in result

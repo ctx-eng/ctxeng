@@ -82,7 +82,9 @@ class ContextAssembler:
         )
 
         if _estimate_tokens(prompt) > self.max_tokens:
-            prompt = self._trim_to_budget(query, prompt, memories, turns, tool_outputs or [], profile_block)
+            prompt = self._trim_to_budget(
+                query, prompt, memories, turns, tool_outputs or [], profile_block
+            )
 
         return prompt
 

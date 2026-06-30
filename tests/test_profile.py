@@ -90,6 +90,7 @@ def test_context_manager_profile_in_prompt() -> None:
     mgr._profile_store.set_tags("u1", ["developer"])
 
     from ctxeng.models import ConversationTurn
+
     turns = [ConversationTurn(role="user", content="hi")]
     prompt = mgr.build_prompt("u1", turns, "what do I like?")
     assert "User profile:" in prompt

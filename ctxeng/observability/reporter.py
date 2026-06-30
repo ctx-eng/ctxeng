@@ -20,12 +20,14 @@ def _format_trace_lines(trace: ContextTrace) -> list[str]:
             for item in items:
                 score = item.get("score", 0)
                 text = item.get("text", "")[:50]
-                lines.append(f"      score={score:.3f}  \"{text}\"")
+                lines.append(f'      score={score:.3f}  "{text}"')
 
         lines.append("")
 
-    lines.append(f"Total: {trace.total_duration_ms:.1f}ms, {trace.total_tokens} tokens, "
-                  f"{len(trace.spans)} stages")
+    lines.append(
+        f"Total: {trace.total_duration_ms:.1f}ms, {trace.total_tokens} tokens, "
+        f"{len(trace.spans)} stages"
+    )
     lines.append(f"Prompt length: {len(trace.prompt)} chars")
     return lines
 
@@ -35,8 +37,8 @@ def format_trace(trace: ContextTrace) -> str:
 
 
 def format_trace_short(trace: ContextTrace) -> str:
-    stages = ", ".join(
-        f"{s.stage}: {s.duration_ms:.0f}ms" for s in trace.spans
+    stages = ", ".join(f"{s.stage}: {s.duration_ms:.0f}ms" for s in trace.spans)
+    return (
+        f"#{trace.trace_id} | {stages} "
+        f"| total {trace.total_duration_ms:.0f}ms, {trace.total_tokens}tok"
     )
-    return (f"#{trace.trace_id} | {stages} "
-            f"| total {trace.total_duration_ms:.0f}ms, {trace.total_tokens}tok")

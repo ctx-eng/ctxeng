@@ -25,6 +25,7 @@ class WebSearchTool(BaseTool):
             )
         try:
             import urllib.request
+
             req = urllib.request.Request(url, headers={"User-Agent": "CtxEng/1.0"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 content = resp.read().decode("utf-8", errors="replace")[:3000]

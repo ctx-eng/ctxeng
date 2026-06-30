@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
@@ -54,7 +53,7 @@ class MemoryResponse(BaseModel):
     id: str
     user_id: str
     text: str
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
 
 
 class PromptResponse(BaseModel):
@@ -145,8 +144,11 @@ def build_prompt(body: BuildPromptRequest) -> PromptResponse:
         tool_outputs = _mgr.detect_and_run_tools(body.current_query)
         profile_context = _profile_store.to_context(body.user_id)
         prompt, _ = _tracer.assemble(
-            body.user_id, body.turns, body.current_query,
-            tool_outputs=tool_outputs, profile_context=profile_context,
+            body.user_id,
+            body.turns,
+            body.current_query,
+            tool_outputs=tool_outputs,
+            profile_context=profile_context,
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
@@ -166,7 +168,9 @@ def chat(body: ChatRequest) -> ChatResponse:
         resp = generate_reply(_get_llm(), system_msg.content, user_msg.content)
         return ChatResponse(content=resp.content, finish_reason=resp.finish_reason)
     except ImportError as exc:
-        raise HTTPException(status_code=503, detail="LLM provider not available (install openai)") from exc
+        raise HTTPException(
+            status_code=503, detail="LLM provider not available (install openai)"
+        ) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -239,8 +243,11 @@ def explain_prompt(body: BuildPromptRequest) -> ExplainResponse:
         tool_outputs = _mgr.detect_and_run_tools(body.current_query)
         profile_context = _profile_store.to_context(body.user_id)
         prompt, trace = _tracer.assemble(
-            body.user_id, body.turns, body.current_query,
-            tool_outputs=tool_outputs, profile_context=profile_context,
+            body.user_id,
+            body.turns,
+            body.current_query,
+            tool_outputs=tool_outputs,
+            profile_context=profile_context,
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc

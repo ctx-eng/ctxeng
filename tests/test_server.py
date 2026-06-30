@@ -49,12 +49,15 @@ def test_build_prompt():
 
 
 def test_chat_endpoint_no_openai():
-    r = client.post("/chat", json={
-        "messages": [
-            {"role": "system", "content": "You are helpful."},
-            {"role": "user", "content": "Hello."},
-        ],
-    })
+    r = client.post(
+        "/chat",
+        json={
+            "messages": [
+                {"role": "system", "content": "You are helpful."},
+                {"role": "user", "content": "Hello."},
+            ],
+        },
+    )
     # Should return 503 if openai SDK not installed
     assert r.status_code in (200, 503)
     if r.status_code == 503:

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 
 class EmbeddingModel:
     def __init__(self, model_name: str = "all-MiniLM-L6-v2") -> None:
@@ -12,6 +10,7 @@ class EmbeddingModel:
     def available(self) -> bool:
         try:
             import sentence_transformers  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -20,6 +19,7 @@ class EmbeddingModel:
         if self._model is not None:
             return
         from sentence_transformers import SentenceTransformer
+
         self._model = SentenceTransformer(self.model_name)
 
     def encode(self, texts: list[str]) -> list[list[float]]:
@@ -31,7 +31,7 @@ class EmbeddingModel:
         return self.encode([query])[0]
 
     @property
-    def dimension(self) -> Optional[int]:
+    def dimension(self) -> int | None:
         if not self.available:
             return None
         self._lazy_load()

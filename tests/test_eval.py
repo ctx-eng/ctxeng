@@ -60,6 +60,7 @@ class TestContextMetrics:
 
     def test_memory_retention_dataset_loaded(self) -> None:
         from ctxeng.eval.datasets import BUILT_IN_DATASETS
+
         assert "memory_retention" in BUILT_IN_DATASETS
         ds = BUILT_IN_DATASETS["memory_retention"]
         assert len(ds.memories) == 7

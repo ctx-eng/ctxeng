@@ -21,17 +21,21 @@ class AlwaysEchoProvider(LLMProvider):
 class TestLLMProvider:
     def test_provider_returns_response(self) -> None:
         provider = AlwaysEchoProvider()
-        resp = provider.generate([
-            LLMMessage(role="user", content="hello"),
-        ])
+        resp = provider.generate(
+            [
+                LLMMessage(role="user", content="hello"),
+            ]
+        )
         assert resp.content == "hello"
         assert resp.finish_reason == "stop"
 
     def test_stream_returns_response(self) -> None:
         provider = AlwaysEchoProvider()
-        resp = provider.stream([
-            LLMMessage(role="user", content="test stream"),
-        ])
+        resp = provider.stream(
+            [
+                LLMMessage(role="user", content="test stream"),
+            ]
+        )
         assert resp.content == "test stream"
 
     def test_model_name(self) -> None:
@@ -40,10 +44,12 @@ class TestLLMProvider:
 
     def test_multiple_messages(self) -> None:
         provider = AlwaysEchoProvider()
-        resp = provider.generate([
-            LLMMessage(role="system", content="be helpful"),
-            LLMMessage(role="user", content="what's up"),
-        ])
+        resp = provider.generate(
+            [
+                LLMMessage(role="system", content="be helpful"),
+                LLMMessage(role="user", content="what's up"),
+            ]
+        )
         assert resp.content == "what's up"
 
 

@@ -222,6 +222,7 @@ class TestContextRouter:
         store = InMemoryStore()
         store.add("alice", "custom retriever test")
         from ctxeng.retrieval.hybrid import HybridRetriever
+
         retriever = HybridRetriever(store)
         router = ContextRouter(store, retriever=retriever)
         result = router.step("alice", "custom")

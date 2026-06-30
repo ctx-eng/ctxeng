@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from ctxeng.models import MemoryItem
 
@@ -14,7 +13,7 @@ except ImportError:
 
 
 class ImageIngestor:
-    def __init__(self, caption_model: Optional[str] = None) -> None:
+    def __init__(self, caption_model: str | None = None) -> None:
         self.caption_model = caption_model
         self._hf_pipeline = None
 
@@ -23,6 +22,7 @@ class ImageIngestor:
         if self.caption_model:
             try:
                 import transformers  # noqa: F401
+
                 return True
             except ImportError:
                 return False
@@ -54,6 +54,7 @@ class ImageIngestor:
             return self._extract_basic_info(filepath)
         self._load_captioner()
         from PIL import Image as PILImage
+
         img = PILImage.open(filepath)
         result = self._hf_pipeline(img)
         img.close()

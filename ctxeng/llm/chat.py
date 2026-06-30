@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.llm.base import LLMMessage, LLMProvider, LLMResponse
 from ctxeng.models import ConversationTurn
@@ -10,7 +8,7 @@ from ctxeng.models import ConversationTurn
 def run_chat(
     provider: LLMProvider,
     user_id: str = "chat-user",
-    system_instruction: Optional[str] = None,
+    system_instruction: str | None = None,
 ) -> None:
     from ctxeng.stores.memory import InMemoryStore
 

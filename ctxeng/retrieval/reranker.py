@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from ctxeng.models import MemoryItem
 
 
@@ -14,6 +12,7 @@ class CrossEncoderReranker:
     def available(self) -> bool:
         try:
             from sentence_transformers import CrossEncoder  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -22,10 +21,11 @@ class CrossEncoderReranker:
         if self._model is not None:
             return
         from sentence_transformers import CrossEncoder
+
         self._model = CrossEncoder(self.model_name)
 
     def rerank(
-        self, query: str, candidates: list[MemoryItem], top_k: Optional[int] = None
+        self, query: str, candidates: list[MemoryItem], top_k: int | None = None
     ) -> list[MemoryItem]:
         self._lazy_load()
         if not candidates:

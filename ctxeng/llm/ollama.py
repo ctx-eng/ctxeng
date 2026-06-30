@@ -28,12 +28,14 @@ class OllamaProvider(LLMProvider):
 
     def generate(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         raw = [{"role": m.role, "content": m.content} for m in messages]
-        result = self._post({
-            "model": self._model,
-            "messages": raw,
-            "stream": False,
-            **kwargs,
-        })
+        result = self._post(
+            {
+                "model": self._model,
+                "messages": raw,
+                "stream": False,
+                **kwargs,
+            }
+        )
         return LLMResponse(
             content=result["message"]["content"],
             finish_reason=result.get("done_reason", "stop"),
@@ -41,7 +43,9 @@ class OllamaProvider(LLMProvider):
 
     def stream(self, messages: list[LLMMessage], **kwargs) -> LLMResponse:
         raw = [{"role": m.role, "content": m.content} for m in messages]
-        data = json.dumps({"model": self._model, "messages": raw, "stream": True, **kwargs}).encode()
+        data = json.dumps(
+            {"model": self._model, "messages": raw, "stream": True, **kwargs}
+        ).encode()
         req = urllib.request.Request(
             f"{self._base_url}/api/chat",
             data=data,
