@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -34,16 +34,23 @@ class ProfileStore:
     def get_or_create(self, user_id: str, name: str = "") -> UserProfile:
         profile = self._profiles.get(user_id)
         if profile is None:
-            now = datetime.utcnow().isoformat()
+            now = datetime.now(UTC).isoformat()
             profile = UserProfile(user_id=user_id, name=name, created_at=now, updated_at=now)
             self._profiles[user_id] = profile
         return profile
 
-    def set_preference(self, user_id: str, key: str, value: str, category: str = "general") -> Preference:
+    def set_preference(
+        self, user_id: str, key: str, value: str, category: str = "general"
+    ) -> Preference:
         profile = self.get_or_create(user_id)
-        pref = Preference(key=key, value=value, category=category, updated_at=datetime.utcnow().isoformat())
+        pref = Preference(
+            key=key,
+            value=value,
+            category=category,
+            updated_at=datetime.now(UTC).isoformat(),
+        )
         profile.preferences[key] = pref
-        profile.updated_at = datetime.utcnow().isoformat()
+        profile.updated_at = datetime.now(UTC).isoformat()
         return pref
 
     def get_preference(self, user_id: str, key: str) -> Preference | None:
@@ -55,7 +62,7 @@ class ProfileStore:
     def set_tags(self, user_id: str, tags: list[str]) -> None:
         profile = self.get_or_create(user_id)
         profile.tags = tags
-        profile.updated_at = datetime.utcnow().isoformat()
+        profile.updated_at = datetime.now(UTC).isoformat()
 
     def to_context(self, user_id: str) -> str:
         """Format profile as a context snippet for prompt injection."""
