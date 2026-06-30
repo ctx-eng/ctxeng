@@ -24,7 +24,7 @@ jobs:
       - name: Install core dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[retrieval,test]"
+          pip install -e ".[retrieval,test,pdf]"
 
       - name: Run tests
         run: python -m pytest -q --tb=short --junit-xml=report.xml
@@ -62,7 +62,7 @@ jobs:
           python-version: "3.11"
       - name: Install
         run: |
-          pip install -e ".[retrieval,test]"
+          pip install -e ".[retrieval,test,pdf]"
       - name: Run benchmarks
         run: |
           python -m pytest tests/test_eval.py -q --tb=short -k "benchmark"

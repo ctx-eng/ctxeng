@@ -19,13 +19,18 @@ retrieval = ["rank-bm25>=0.2"]
 vector = [
     "sentence-transformers>=3.0",
     "numpy>=1.24",
+    "torch>=2.0",
 ]
 ingestion = [
     "pillow>=10.0",
     "transformers>=4.40",
+    "python-magic>=0.4",
+]
+pdf = [
+    "pypdf2>=3.0",
 ]
 all = [
-    "ctxeng[templates, retrieval, vector, llm, ingestion]",
+    "ctxeng[templates, retrieval, vector, llm, ingestion, pdf]",
 ]
 test = ["httpx>=0.28"]
 
