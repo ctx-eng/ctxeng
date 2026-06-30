@@ -51,11 +51,27 @@ class ContextManager:
         turns: list[ConversationTurn],
         current_query: str,
         tool_outputs: list[ToolOutput] | None = None,
+        auto_tools: bool = True,
     ) -> str:
+        validation = self._input_validator.validate(current_query)
+        if not validation.passed:
+            current_query = f"[Filtered: {validation.reason}] Original: {current_query[:200]}"
+
+        if tool_outputs is None and auto_tools:
+            tool_outputs = self.execute_tools(current_query)
+
+        filtered_tool_outputs = tool_outputs or []
+        if self._poisoning_filter:
+            filtered_tool_outputs = [
+                o for o in filtered_tool_outputs if self._poisoning_filter.check(o.output).passed
+            ]
+
         profile_context = self._profile_store.to_context(user_id)
         return self._assembler.assemble(
-            user_id, turns, current_query,
-            tool_outputs=tool_outputs,
+            user_id,
+            turns,
+            current_query,
+            tool_outputs=filtered_tool_outputs,
             profile_context=profile_context,
         )
 
