@@ -3,7 +3,6 @@
 import argparse
 import json
 from dataclasses import asdict
-from typing import Dict
 
 from ctxeng.assembly.assembler import ContextAssembler
 from ctxeng.eval.benchmark import BenchmarkResult, BenchmarkRunner, format_benchmark_result
@@ -47,7 +46,7 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
     else:
         names = list_datasets()
 
-    results: Dict[str, BenchmarkResult] = {}
+    results: dict[str, BenchmarkResult] = {}
     print(f"Running benchmarks on {len(names)} datasets...")
     for name in names:
         dataset = BUILT_IN_DATASETS[name]
@@ -95,6 +94,50 @@ def cmd_check(args: argparse.Namespace) -> None:
         print("Some checks failed.")
 
 
+def cmd_compare(args: argparse.Namespace) -> None:
+    with open(args.baseline) as f:
+        baseline = json.load(f)
+    with open(args.result) as f:
+        result_data = json.load(f)
+
+    print(f"Comparing {args.result} against baseline {args.baseline}")
+    print()
+    metrics = [
+        "avg_precision_at_1",
+        "avg_precision_at_3",
+        "avg_recall_at_5",
+        "mrr",
+        "map_score",
+        "avg_token_efficiency",
+        "avg_latency_ms",
+    ]
+    all_pass = True
+    for dataset_name in result_data:
+        if dataset_name not in baseline:
+            print(f"  {dataset_name}: not in baseline, skipping")
+            continue
+        b = baseline[dataset_name]
+        r = result_data[dataset_name]
+        print(f"  {dataset_name}:")
+        for m in metrics:
+            bv = b.get(m, 0)
+            rv = r.get(m, 0)
+            diff = rv - bv
+            arrow = "↑" if diff > 0 else ("↓" if diff < 0 else "→")
+            threshold = getattr(args, "regression_threshold", 0.0)
+            if diff < -threshold:
+                print(f"    {m}: {rv:.4f} vs {bv:.4f} ({diff:+.4f}) {arrow} REGRESSION")
+                all_pass = False
+            else:
+                print(f"    {m}: {rv:.4f} vs {bv:.4f} ({diff:+.4f}) {arrow}")
+        print()
+
+    if all_pass:
+        print("No regressions detected.")
+    else:
+        print("Regressions detected — review above.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="CtxEng evaluation toolkit")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -106,9 +149,26 @@ def main() -> None:
 
     ck = sub.add_parser("check", help="Check benchmark results against thresholds")
     ck.add_argument("--json", "-j", type=str, required=True, help="Path to benchmark JSON")
-    ck.add_argument("--threshold", "-t", type=str, action="append", default=[],
-                    help="Threshold in format metric=value")
+    ck.add_argument(
+        "--threshold",
+        "-t",
+        type=str,
+        action="append",
+        default=[],
+        help="Threshold in format metric=value",
+    )
     ck.set_defaults(func=cmd_check)
+
+    cp = sub.add_parser("compare", help="Compare results against a baseline")
+    cp.add_argument("--baseline", "-b", type=str, required=True, help="Path to baseline JSON")
+    cp.add_argument("--result", "-r", type=str, required=True, help="Path to result JSON")
+    cp.add_argument(
+        "--regression-threshold",
+        type=float,
+        default=0.05,
+        help="Minimum drop to flag as regression (default: 0.05)",
+    )
+    cp.set_defaults(func=cmd_compare)
 
     args = parser.parse_args()
     args.func(args)
