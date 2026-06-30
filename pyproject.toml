@@ -32,7 +32,7 @@ pdf = [
 all = [
     "ctxeng[templates, retrieval, vector, llm, ingestion, pdf]",
 ]
-test = ["httpx>=0.28"]
+test = ["pytest>=8.0", "httpx>=0.28"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
