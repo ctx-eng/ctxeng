@@ -5,6 +5,7 @@ import pytest
 from ctxeng.stores.base import ContextStore
 from ctxeng.stores.memory import InMemoryStore
 from ctxeng.stores.sqlite import SQLiteStore
+from ctxeng.stores.tiered import TieredStore
 
 try:
     import chromadb  # noqa: F401
@@ -138,8 +139,6 @@ class TestInMemoryStoreSpecific:
         assert m1.id != m2.id
 
 
-
-
 class TestSQLiteStoreSpecific:
     def test_persistence_across_instances(self, tmp_path: pytest.TempPathFactory) -> None:
         db_file = str(tmp_path / "test.db")
@@ -182,3 +181,95 @@ class TestVectorStoreSpecific:
         s.clear()
         results = s.search("alice", "")
         assert len(results) == 0
+
+
+class TestTieredStore:
+    def test_add_working_memory(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "working memory", metadata={"type": "working"})
+        assert len(working.list("alice")) == 1
+        assert len(episodic.list("alice")) == 0
+        assert len(long_term.list("alice")) == 0
+
+    def test_add_episodic_memory(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "episodic summary", metadata={"type": "episodic"})
+        assert len(episodic.list("alice")) == 1
+        assert len(working.list("alice")) == 0
+
+    def test_add_long_term_memory(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "long term memory", metadata={"type": "long_term"})
+        assert len(long_term.list("alice")) == 1
+
+    def test_search_falls_through_tiers(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "working: I like Python", metadata={"type": "working"})
+        ts.add("alice", "episodic: visited Japan", metadata={"type": "episodic"})
+        ts.add("alice", "long_term: data scientist", metadata={"type": "long_term"})
+
+        results = ts.search("alice", "Python")
+        assert len(results) >= 1
+        assert any("Python" in r.text for r in results)
+
+    def test_search_aggregates_all_tiers(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "w1", metadata={"type": "working"})
+        ts.add("alice", "e1", metadata={"type": "episodic"})
+        ts.add("alice", "l1", metadata={"type": "long_term"})
+
+        results = ts.search("alice", "", top_k=5)
+        assert len(results) == 3
+
+    def test_delete_across_tiers(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        m = ts.add("alice", "test", metadata={"type": "working"})
+        assert ts.delete(m.id) is True
+        assert ts.delete("nonexistent") is False
+
+    def test_list_all_tiers(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "w", metadata={"type": "working"})
+        ts.add("alice", "e", metadata={"type": "episodic"})
+        ts.add("alice", "l", metadata={"type": "long_term"})
+
+        all_memories = ts.list("alice")
+        assert len(all_memories) == 3
+
+    def test_clear_all_tiers(self) -> None:
+        working = InMemoryStore()
+        episodic = InMemoryStore()
+        long_term = InMemoryStore()
+        ts = TieredStore(working, episodic, long_term)
+
+        ts.add("alice", "test")
+        ts.clear()
+        assert len(ts.list("alice")) == 0
